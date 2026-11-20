@@ -46,11 +46,20 @@ const state = {
   gen: 0,
   limits: {},
   total: 0,
+  sites: loadCfg()?.sites || [],
+  demoSite: 'demo:repylo',
+  notice: '',
 };
 
 function loadCfg() {
-  try { return JSON.parse(localStorage.getItem(CFG_KEY)); } catch { return null; }
+  try {
+    const c = JSON.parse(localStorage.getItem(CFG_KEY));
+    if (c && !c.home) c.home = c.base;
+    return c;
+  } catch { return null; }
 }
+const saveCfg = () => localStorage.setItem(CFG_KEY, JSON.stringify(state.cfg));
+const currentBase = () => (state.demo ? state.demoSite : state.cfg.base);
 
 /* ------------------------------------------------------------------ API */
 
@@ -67,14 +76,37 @@ async function throttle() {
   if (at > now) await sleep(at - now);
 }
 
-function api(path, params = {}) {
+function api(path, params = {}, base = currentBase()) {
   const qs = new URLSearchParams(params).toString();
-  const key = path + '?' + qs;
+  const pq = path + (qs ? '?' + qs : '');
+  const key = base + pq;
   if (!cache.has(key)) {
-    const p = (state.demo ? demoApi(path, params) : realApi(key)).catch((e) => { cache.delete(key); throw e; });
+    const p = (state.demo ? demoApi(path, params, base) : realApi(pq, { base, token: state.cfg.token }))
+      .catch((e) => { cache.delete(key); throw e; });
     cache.set(key, p);
   }
   return cache.get(key);
+}
+
+// Alle Seiten des Kontos (braucht die Token-Berechtigung „Read sites“).
+async function loadSites() {
+  if (state.demo) return (state.sites = DEMO_SITES);
+  const home = state.cfg.home;
+  const hosted = /\.goatcounter\.com$/.test(home);
+  try {
+    const r = await api('/sites', {}, home);
+    state.sites = (r.sites || []).map((s) => {
+      const base = hosted || !s.cname ? `https://${s.code}.goatcounter.com` : `https://${s.cname}`;
+      const domain = (s.link_domain || '').replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+      return { base, name: domain || s.code, sub: base.replace(/^https?:\/\//, '') };
+    });
+    if (!hosted && !state.sites.some((s) => s.base === home)) state.sites = [];
+  } catch {
+    state.sites = state.cfg.sites || [];
+  }
+  state.cfg.sites = state.sites;
+  saveCfg();
+  return state.sites;
 }
 
 async function realApi(pathAndQuery, cfg = state.cfg) {
@@ -203,24 +235,25 @@ function renderSetup(error = '') {
       <button class="btn ghost" type="button" id="demo">Erst mal die Demo ansehen</button>
       <ol class="steps">
         <li>In GoatCounter anmelden → oben rechts <b>User</b> → <b>API</b></li>
-        <li>Neuen Token anlegen, nur <b>Read statistics</b> ankreuzen</li>
+        <li>Neuen Token anlegen, <b>Read statistics</b> und <b>Read sites</b> ankreuzen</li>
         <li>Token kopieren und hier einfügen</li>
       </ol>
     </form>`;
-  $('#demo').onclick = () => { state.demo = true; cache.clear(); render(); };
+  $('#demo').onclick = () => { state.demo = true; state.sites = DEMO_SITES; cache.clear(); render(); };
   $('#setup').onsubmit = async (ev) => {
     ev.preventDefault();
     const f = ev.target;
     const btn = $('button[type=submit]', f);
     const site = f.site.value.trim();
-    const cfg = { site, base: normalizeBase(site), token: f.token.value.trim() };
+    const base = normalizeBase(site);
+    const cfg = { site, base, home: base, token: f.token.value.trim() };
     if (!cfg.base) return renderSetup('Die Adresse sieht nicht richtig aus.');
     btn.disabled = true; btn.textContent = 'Prüfe …';
     try {
       const p = period(1);
       await realApi('/stats/total?' + new URLSearchParams(p.q), cfg);
-      localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
-      state.cfg = cfg; state.demo = false; cache.clear();
+      state.cfg = cfg; state.demo = false; state.sites = []; cache.clear();
+      saveCfg();
       render();
     } catch (e) {
       state.cfg = { site };
@@ -231,15 +264,20 @@ function renderSetup(error = '') {
 }
 
 function siteName() {
-  if (state.demo) return 'Demo-Seite';
-  return state.cfg.base.replace(/^https?:\/\//, '').replace(/\.goatcounter\.com$/, '');
+  const base = currentBase();
+  const known = state.sites.find((s) => s.base === base);
+  if (known) return known.name;
+  return base.replace(/^(https?:\/\/|demo:)/, '').replace(/\.goatcounter\.com$/, '');
 }
 
 function renderDashboard() {
   const skel = '<div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>';
   app.innerHTML = `
     <header class="top">
-      <div class="brand"><small>GoatCounter</small><h1>${esc(siteName())}</h1></div>
+      <button class="brand" id="brand" disabled>
+        <small>GoatCounter</small>
+        <h1><span id="site-name">${esc(siteName())}</span><i class="caret" hidden>▾</i></h1>
+      </button>
       <button class="icon-btn" id="refresh" aria-label="Aktualisieren">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </button>
@@ -248,6 +286,7 @@ function renderDashboard() {
       </button>
     </header>
     ${state.demo ? `<div class="banner"><span>Demo mit erfundenen Zahlen.</span><button id="exit-demo">Eigene Seite verbinden</button></div>` : ''}
+    ${state.notice ? `<div class="banner"><span>${esc(state.notice)}</span></div>` : ''}
     <nav class="ranges" aria-label="Zeitraum">
       ${RANGES.map((r) => `<button class="chip" data-range="${r.id}" aria-pressed="${r.id === state.range}">${r.label}</button>`).join('')}
     </nav>
@@ -269,9 +308,58 @@ function renderDashboard() {
   $('#refresh').onclick = () => { cache.clear(); load(); };
   $('#settings').onclick = openSettings;
   const exit = $('#exit-demo');
-  if (exit) exit.onclick = () => { state.demo = false; cache.clear(); history.replaceState(null, '', location.pathname); render(); };
+  if (exit) exit.onclick = () => { state.demo = false; state.sites = []; cache.clear(); history.replaceState(null, '', location.pathname); render(); };
   app.querySelector('.grid').onclick = onGridClick;
+  state.notice = '';
+  $('#brand').onclick = openSites;
+  const showSwitcher = () => {
+    const brand = $('#brand');
+    if (!brand) return;
+    $('#site-name').textContent = siteName();
+    const many = state.sites.length > 1;
+    brand.disabled = !many;
+    $('.caret', brand).hidden = !many;
+  };
+  showSwitcher();
   load();
+  loadSites().then(showSwitcher);
+}
+
+function switchSite(base) {
+  if (state.demo) state.demoSite = base;
+  else { state.cfg.base = base; saveCfg(); }
+  state.limits = {};
+  closeSheet();
+  render();
+}
+
+// Liste aller Seiten mit den Besuchern im gewählten Zeitraum.
+function openSites() {
+  const range = RANGES.find((r) => r.id === state.range) || RANGES[1];
+  const p = period(range.days);
+  const cur = currentBase();
+  openSheet(`Deine Seiten · ${range.label}`, 'Seite wählen', `<ul class="list">${state.sites.map((s, i) => `
+    <li><button class="row ${s.base === cur ? 'current' : ''}" data-site="${i}">
+      <span class="name"><b>${esc(s.name)}</b><small>${esc(s.sub)}</small></span>
+      <span class="val" data-count="${i}">…</span>
+      <span class="chev">${s.base === cur ? '✓' : '›'}</span>
+    </button></li>`).join('')}</ul>`);
+  const body = $('#sheet-body');
+  body.onclick = (ev) => {
+    const b = ev.target.closest('[data-site]');
+    if (b) switchSite(state.sites[+b.dataset.site].base);
+  };
+  const token = (openDetail.token = {});
+  const totals = state.sites.map((s) => api('/stats/total', p.q, s.base).then((r) => r.total || 0, () => null));
+  totals.forEach((t, i) => t.then((v) => {
+    const el = $(`[data-count="${i}"]`, body);
+    if (openDetail.token === token && el) el.textContent = v === null ? '–' : nf.format(v);
+  }));
+  Promise.all(totals).then((vals) => {
+    if (openDetail.token !== token) return;
+    const max = Math.max(1, ...vals.map((v) => v || 0));
+    vals.forEach((v, i) => $(`[data-site="${i}"]`, body)?.style.setProperty('--w', ((v || 0) / max) * 100 + '%'));
+  });
 }
 
 async function load() {
@@ -292,6 +380,13 @@ async function load() {
 
 function fail(e) {
   if (e instanceof AuthError) {
+    if (state.cfg?.home && state.cfg.base !== state.cfg.home) {
+      state.notice = `Der Token hat keinen Zugriff auf ${siteName()}.`;
+      state.cfg.base = state.cfg.home; saveCfg();
+      state.gen++;
+      render();
+      return true;
+    }
     const site = state.cfg?.site;
     localStorage.removeItem(CFG_KEY);
     state.cfg = { site };
@@ -448,6 +543,7 @@ function openSheet(kicker, title, html) {
   $('#sheet-kicker').textContent = kicker;
   $('#sheet-title').textContent = title;
   $('#sheet-body').innerHTML = html;
+  $('#sheet-body').onclick = null;
   sheet.hidden = false;
   document.body.style.overflow = 'hidden';
 }
@@ -481,6 +577,7 @@ async function openDetail(sec, item, p) {
 
 function openSettings() {
   const base = state.demo ? 'https://www.goatcounter.com' : state.cfg.base;
+  $('#sheet-body').onclick = null;
   openSheet('Einstellungen', siteName(), `
     <ul class="list">
       <li><a class="row" href="${esc(base)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">
@@ -491,7 +588,7 @@ function openSettings() {
     <p class="foot">Tipp: Über „Teilen → Zum Home-Bildschirm“ wird GoatPocket zur App.</p>`);
   $('#logout').onclick = () => {
     localStorage.removeItem(CFG_KEY);
-    state.cfg = null; state.demo = false; cache.clear();
+    state.cfg = null; state.demo = false; state.sites = []; cache.clear();
     history.replaceState(null, '', location.pathname);
     closeSheet(); render();
   };
@@ -515,8 +612,16 @@ const DEMO = {
   campaigns: ['newsletter-november', 'launch'],
 };
 
-async function demoApi(path, params) {
+const DEMO_SITES = [
+  { base: 'demo:repylo', name: 'repylo.com', sub: 'repylo.goatcounter.com', mul: 1 },
+  { base: 'demo:blog', name: 'blog.example.com', sub: 'meinblog.goatcounter.com', mul: 2.6 },
+  { base: 'demo:docs', name: 'docs.example.com', sub: 'docs.goatcounter.com', mul: 0.35 },
+];
+if (state.demo) state.sites = DEMO_SITES;
+
+async function demoApi(path, params, base) {
   await sleep(120 + Math.random() * 380);
+  const mul = DEMO_SITES.find((s) => s.base === base)?.mul || 1;
   const start = Date.parse(params.start), end = Date.parse(params.end);
   const hours = Math.round((end - start) / HOUR) + 1;
   const hourVal = (t) => {
@@ -525,7 +630,7 @@ async function demoApi(path, params) {
     const dayCurve = Math.max(0.05, Math.sin(((h - 5) / 19) * Math.PI));
     const weekend = [0, 6].includes(d.getDay()) ? 0.55 : 1;
     const trend = 0.6 + 0.4 * ((t - (Date.now() - 400 * DAY)) / (400 * DAY));
-    return t > Date.now() ? 0 : Math.round(r * 9 * dayCurve * weekend * trend);
+    return t > Date.now() ? 0 : Math.round(r * 9 * mul * dayCurve * weekend * trend);
   };
   const byDay = new Map();
   let total = 0;
@@ -565,5 +670,7 @@ async function demoApi(path, params) {
   const s = share(names, params.limit, page === 'campaigns' ? 0.03 : 0.48);
   return { more: s.more, stats: s.list.map(([n, c]) => (Array.isArray(n) ? { id: n[0], name: n[1], count: c } : { id: n || 'x', name: n, count: c })) };
 }
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 
 render();

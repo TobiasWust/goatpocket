@@ -51,7 +51,13 @@ h1, h2, h3, p { margin: 0; }
   display: flex; align-items: center; gap: 12px;
   padding: 14px 0 10px;
 }
-.brand { flex: 1; min-width: 0; }
+.brand { flex: 1; min-width: 0; text-align: left; }
+.brand:disabled { cursor: default; color: inherit; }
+.brand h1 { display: flex; align-items: center; gap: 6px; }
+.brand h1 span { overflow: hidden; text-overflow: ellipsis; }
+.brand .caret { font-style: normal; font-size: 14px; color: var(--muted); flex: none; }
+.brand .caret[hidden] { display: none; }
+.row.current .name b { color: var(--accent); }
 .brand small { display: block; color: var(--muted); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
 .brand h1 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .icon-btn {

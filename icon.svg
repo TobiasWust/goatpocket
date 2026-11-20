@@ -1,6 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#1c1b19"/>
-  <rect x="112" y="272" width="64" height="128" rx="14" fill="#e4572e" opacity=".55"/>
-  <rect x="224" y="200" width="64" height="200" rx="14" fill="#e4572e" opacity=".8"/>
-  <rect x="336" y="112" width="64" height="288" rx="14" fill="#e4572e"/>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="46%" r="70%">
+      <stop offset="0" stop-color="#0d2016"/>
+      <stop offset="1" stop-color="#050807"/>
+    </radialGradient>
+    <pattern id="scan" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="2" fill="#39ff88" opacity=".05"/>
+    </pattern>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="9" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#scan)"/>
+  <g filter="url(#glow)" fill="none" stroke="#39ff88" stroke-width="13" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Hörner -->
+    <path d="M204 190 C196 128 158 96 108 104 C142 122 158 152 166 196"/>
+    <path d="M308 190 C316 128 354 96 404 104 C370 122 354 152 346 196"/>
+    <!-- Ohren -->
+    <path d="M160 232 L98 226 L150 274" fill="#0b1810"/>
+    <path d="M352 232 L414 226 L362 274" fill="#0b1810"/>
+    <!-- Kopf -->
+    <path d="M180 192 L332 192 L358 248 L304 364 L256 386 L208 364 L154 248 Z" fill="#0b1810"/>
+    <!-- Bart -->
+    <path d="M238 392 L274 392 L256 436 Z" fill="#39ff88"/>
+    <!-- Prompt als Schnauze -->
+    <path d="M226 304 L246 320 L226 336"/>
+    <path d="M262 338 L290 338"/>
+  </g>
+  <!-- Ziegenaugen: waagerechte Schlitze -->
+  <g filter="url(#glow)" fill="#39ff88">
+    <rect x="190" y="242" width="46" height="15" rx="5"/>
+    <rect x="276" y="242" width="46" height="15" rx="5"/>
+  </g>
 </svg>
