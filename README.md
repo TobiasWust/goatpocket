@@ -19,7 +19,7 @@ Der Token liegt nur im `localStorage` des Geräts und wird ausschließlich an di
 
 ## Aufs Handy
 
-Den Ordner auf irgendeinen statischen Hoster legen (Netlify, GitHub Pages, …), die Adresse am Handy öffnen und über „Teilen → Zum Home-Bildschirm“ als App ablegen.
+Live unter https://goatpocket.netlify.app – jeder Push auf `main` wird von Netlify automatisch veröffentlicht. Die Adresse am Handy öffnen und über „Teilen → Zum Home-Bildschirm“ als App ablegen.
 
 ## Hinweise
 
