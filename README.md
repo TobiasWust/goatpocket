@@ -26,5 +26,6 @@ Live unter https://goatpocket.wust.io – jeder Push auf `main` wird von Netlify
 - PWA: `sw.js` cached die App-Hülle (Netz zuerst, Cache als Rückfall); Statistiken brauchen weiterhin eine Verbindung.
 - Mit der Token-Berechtigung **Read sites** erscheint oben ein Umschalter für alle Seiten des Kontos.
 
-- GoatCounter erlaubt 4 API-Anfragen pro Sekunde; die App drosselt entsprechend, ein kompletter Ladevorgang dauert daher rund 3 Sekunden.
+- GoatCounter erlaubt 4 Anfragen pro Sekunde, und die CORS-Vorabanfrage des Browsers zählt mit. Die App macht deshalb höchstens 2 API-Aufrufe pro Sekunde und versucht abgelehnte Aufrufe erneut; ein kompletter Ladevorgang dauert rund 6 Sekunden. Antworten werden 5 Minuten auf dem Gerät zwischengespeichert.
+- Seiten mit eigenem GoatCounter-Login sind eigene Konten: über den Seiten-Umschalter → „Weiteres Konto verbinden“ mit eigenem Token hinzufügen.
 - Die Balken werden aus den Stundenwerten der API (UTC) in lokaler Zeit zusammengesetzt.

@@ -47,6 +47,7 @@ const state = {
   limits: {},
   total: 0,
   sites: loadCfg()?.sites || [],
+  sitesErrors: [],
   demoSite: 'demo:repylo',
   notice: '',
 };
@@ -54,26 +55,53 @@ const state = {
 function loadCfg() {
   try {
     const c = JSON.parse(localStorage.getItem(CFG_KEY));
-    if (c && !c.home) c.home = c.base;
+    // Ältere Speicherstände kannten nur ein Konto.
+    if (c && !c.accounts) c.accounts = [{ home: c.home || c.base, token: c.token }];
     return c;
   } catch { return null; }
 }
 const saveCfg = () => localStorage.setItem(CFG_KEY, JSON.stringify(state.cfg));
 const currentBase = () => (state.demo ? state.demoSite : state.cfg.base);
+const short = (base) => base.replace(/^(https?:\/\/|demo:)/, '');
+
+// Jede Seite gehört zu einem Konto (Token); mehrere Konten sind möglich.
+function tokenFor(base) {
+  const accts = state.cfg.accounts;
+  const site = state.sites.find((x) => x.base === base);
+  return (accts.find((a) => a.home === site?.home) || accts.find((a) => a.home === base) || accts[0]).token;
+}
 
 /* ------------------------------------------------------------------ API */
 
 class AuthError extends Error {}
 
 const cache = new Map();
+const STORE_KEY = 'goatpocket.cache';
+const FRESH = 5 * 60e3;
 let lastCall = 0;
 
-// GoatCounter erlaubt 4 Anfragen pro Sekunde – wir bleiben knapp darunter.
+// GoatCounter erlaubt 4 Anfragen pro Sekunde, und der Browser schickt vor jedem
+// API-Aufruf eine CORS-Vorabanfrage, die mitzählt. Also höchstens 2 Aufrufe pro Sekunde.
 async function throttle() {
   const now = Date.now();
-  const at = Math.max(now, lastCall + 280);
+  const at = Math.max(now, lastCall + 560);
   lastCall = at;
   if (at > now) await sleep(at - now);
+}
+
+// Antworten bleiben 5 Minuten auf dem Gerät, damit die App beim Wiederöffnen sofort da ist.
+function stored() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { return {}; }
+}
+function remember(key, data) {
+  const all = stored(), now = Date.now();
+  for (const k of Object.keys(all)) if (now - all[k].t > FRESH) delete all[k];
+  all[key] = { t: now, d: data };
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(all)); } catch { localStorage.removeItem(STORE_KEY); }
+}
+function clearCache() {
+  cache.clear();
+  localStorage.removeItem(STORE_KEY);
 }
 
 function api(path, params = {}, base = currentBase()) {
@@ -81,29 +109,46 @@ function api(path, params = {}, base = currentBase()) {
   const pq = path + (qs ? '?' + qs : '');
   const key = base + pq;
   if (!cache.has(key)) {
-    const p = (state.demo ? demoApi(path, params, base) : realApi(pq, { base, token: state.cfg.token }))
-      .catch((e) => { cache.delete(key); throw e; });
+    const hit = state.demo ? null : stored()[key];
+    const p = hit && Date.now() - hit.t < FRESH
+      ? Promise.resolve(hit.d)
+      : (state.demo
+        ? demoApi(path, params, base)
+        : realApi(pq, { base, token: tokenFor(base) }).then((d) => (remember(key, d), d))
+      ).catch((e) => { cache.delete(key); throw e; });
     cache.set(key, p);
   }
   return cache.get(key);
 }
 
-// Alle Seiten des Kontos (braucht die Token-Berechtigung „Read sites“).
+// Alle Seiten aller verbundenen Konten (braucht die Token-Berechtigung „Read sites“).
 async function loadSites() {
   if (state.demo) return (state.sites = DEMO_SITES);
-  const home = state.cfg.home;
-  const hosted = /\.goatcounter\.com$/.test(home);
-  try {
-    const r = await api('/sites', {}, home);
-    state.sites = (r.sites || []).map((s) => {
-      const base = hosted || !s.cname ? `https://${s.code}.goatcounter.com` : `https://${s.cname}`;
-      const domain = (s.link_domain || '').replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-      return { base, name: domain || s.code, sub: base.replace(/^https?:\/\//, '') };
-    });
-    if (!hosted && !state.sites.some((s) => s.base === home)) state.sites = [];
-  } catch {
-    state.sites = state.cfg.sites || [];
-  }
+  const old = state.cfg.sites || [];
+  const errors = [];
+  const lists = await Promise.all(state.cfg.accounts.map(async ({ home }) => {
+    const hosted = /\.goatcounter\.com$/.test(home);
+    let list;
+    try {
+      const r = await api('/sites', {}, home);
+      // Selbst gehostet kennen wir nur Seiten mit eigener Domain (cname).
+      list = (r.sites || []).filter((x) => hosted || x.cname).map((x) => {
+        const base = hosted ? `https://${x.code}.goatcounter.com` : `https://${x.cname}`;
+        const domain = (x.link_domain || '').replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+        return { base, home, name: domain || x.code, sub: short(base) };
+      });
+    } catch (e) {
+      errors.push(`${short(home)}: ${e.message}`);
+      list = old.filter((x) => x.home === home);
+    }
+    if (!list.some((x) => x.base === home)) {
+      list.unshift({ base: home, home, name: short(home).replace(/\.goatcounter\.com$/, ''), sub: short(home) });
+    }
+    return list;
+  }));
+  const seen = new Set();
+  state.sites = lists.flat().filter((x) => !seen.has(x.base) && seen.add(x.base));
+  state.sitesErrors = errors;
   state.cfg.sites = state.sites;
   saveCfg();
   return state.sites;
@@ -119,11 +164,14 @@ async function realApi(pathAndQuery, cfg = state.cfg) {
         referrerPolicy: 'no-referrer',
       });
     } catch {
-      throw new Error('Keine Verbindung zu ' + cfg.base.replace(/^https?:\/\//, ''));
+      // Ein abgelehnter Aufruf (z. B. Rate-Limit) kommt ohne CORS-Header zurück und
+      // sieht für den Browser wie ein Netzfehler aus – also erst ein paar Mal neu versuchen.
+      if (attempt < 3) { await sleep(1200); continue; }
+      throw new Error('Keine Verbindung zu ' + short(cfg.base));
     }
     if (res.status === 429 && attempt < 4) { await sleep(1100); continue; }
     if (res.status === 401 || res.status === 403) {
-      throw new AuthError(res.status === 401 ? 'Token ungültig.' : 'Dem Token fehlt die Berechtigung „Read statistics“.');
+      throw new AuthError(res.status === 401 ? 'Token ungültig.' : 'Dem Token fehlt die nötige Berechtigung.');
     }
     if (!res.ok) {
       let msg = 'Fehler ' + res.status;
@@ -211,13 +259,13 @@ function render() {
   renderDashboard();
 }
 
-function renderSetup(error = '') {
-  const cfg = state.cfg || {};
+function renderSetup(error = '', adding = false, typed = '') {
+  const cfg = adding ? { site: typed } : state.cfg || {};
   app.innerHTML = `
     <form class="setup" id="setup" autocomplete="off">
       <img class="logo" src="icon.svg" alt="">
-      <h1>GoatPocket</h1>
-      <p>Deine GoatCounter-Statistiken, gemacht fürs Handy.</p>
+      <h1>${adding ? 'Weiteres Konto' : 'GoatPocket'}</h1>
+      <p>${adding ? 'Für Seiten mit eigenem GoatCounter-Login: Code und Token dieses Kontos eintragen.' : 'Deine GoatCounter-Statistiken, gemacht fürs Handy.'}</p>
       ${error ? `<p class="err" role="alert">${esc(error)}</p>` : ''}
       <label class="field">
         <span>Deine GoatCounter-Seite</span>
@@ -232,30 +280,38 @@ function renderSetup(error = '') {
         <small>Bleibt nur auf diesem Gerät gespeichert und geht ausschließlich an deine GoatCounter-Seite.</small>
       </label>
       <button class="btn" type="submit">Verbinden</button>
-      <button class="btn ghost" type="button" id="demo">Erst mal die Demo ansehen</button>
+      <button class="btn ghost" type="button" id="demo">${adding ? 'Abbrechen' : 'Erst mal die Demo ansehen'}</button>
       <ol class="steps">
         <li>In GoatCounter anmelden → oben rechts <b>User</b> → <b>API</b></li>
         <li>Neuen Token anlegen, <b>Read statistics</b> und <b>Read sites</b> ankreuzen</li>
         <li>Token kopieren und hier einfügen</li>
       </ol>
     </form>`;
-  $('#demo').onclick = () => { state.demo = true; state.sites = DEMO_SITES; cache.clear(); render(); };
+  $('#demo').onclick = adding ? render : () => { state.demo = true; state.sites = DEMO_SITES; cache.clear(); render(); };
   $('#setup').onsubmit = async (ev) => {
     ev.preventDefault();
     const f = ev.target;
     const btn = $('button[type=submit]', f);
     const site = f.site.value.trim();
     const base = normalizeBase(site);
-    const cfg = { site, base, home: base, token: f.token.value.trim() };
-    if (!cfg.base) return renderSetup('Die Adresse sieht nicht richtig aus.');
+    const acct = { home: base, token: f.token.value.trim() };
+    if (!base) return renderSetup('Die Adresse sieht nicht richtig aus.', adding, site);
     btn.disabled = true; btn.textContent = 'Prüfe …';
     try {
       const p = period(1);
-      await realApi('/stats/total?' + new URLSearchParams(p.q), cfg);
-      state.cfg = cfg; state.demo = false; state.sites = []; cache.clear();
+      await realApi('/stats/total?' + new URLSearchParams(p.q), { base, token: acct.token });
+      if (adding) {
+        state.cfg.accounts = state.cfg.accounts.filter((a) => a.home !== base).concat(acct);
+        state.cfg.base = base;
+      } else {
+        state.cfg = { site, base, accounts: [acct], sites: [] };
+        state.demo = false; state.sites = [];
+        clearCache();
+      }
       saveCfg();
       render();
     } catch (e) {
+      if (adding) return renderSetup(e.message, true, site);
       state.cfg = { site };
       renderSetup(e.message);
       state.cfg = null;
@@ -267,16 +323,16 @@ function siteName() {
   const base = currentBase();
   const known = state.sites.find((s) => s.base === base);
   if (known) return known.name;
-  return base.replace(/^(https?:\/\/|demo:)/, '').replace(/\.goatcounter\.com$/, '');
+  return short(base).replace(/\.goatcounter\.com$/, '');
 }
 
 function renderDashboard() {
   const skel = '<div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>';
   app.innerHTML = `
     <header class="top">
-      <button class="brand" id="brand" disabled>
+      <button class="brand" id="brand">
         <small>GoatCounter</small>
-        <h1><span id="site-name">${esc(siteName())}</span><i class="caret" hidden>▾</i></h1>
+        <h1><span id="site-name">${esc(siteName())}</span><i class="caret">▾</i></h1>
       </button>
       <button class="icon-btn" id="refresh" aria-label="Aktualisieren">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
@@ -305,24 +361,21 @@ function renderDashboard() {
     state.limits = {};
     load();
   };
-  $('#refresh').onclick = () => { cache.clear(); load(); };
+  $('#refresh').onclick = () => { clearCache(); load(); loadSites().then(showSwitcher); };
   $('#settings').onclick = openSettings;
   const exit = $('#exit-demo');
   if (exit) exit.onclick = () => { state.demo = false; state.sites = []; cache.clear(); history.replaceState(null, '', location.pathname); render(); };
   app.querySelector('.grid').onclick = onGridClick;
   state.notice = '';
   $('#brand').onclick = openSites;
-  const showSwitcher = () => {
-    const brand = $('#brand');
-    if (!brand) return;
-    $('#site-name').textContent = siteName();
-    const many = state.sites.length > 1;
-    brand.disabled = !many;
-    $('.caret', brand).hidden = !many;
-  };
   showSwitcher();
   load();
   loadSites().then(showSwitcher);
+}
+
+function showSwitcher() {
+  const el = $('#site-name');
+  if (el) el.textContent = siteName();
 }
 
 function switchSite(base) {
@@ -343,11 +396,15 @@ function openSites() {
       <span class="name"><b>${esc(s.name)}</b><small>${esc(s.sub)}</small></span>
       <span class="val" data-count="${i}">…</span>
       <span class="chev">${s.base === cur ? '✓' : '›'}</span>
-    </button></li>`).join('')}</ul>`);
+    </button></li>`).join('')}</ul>
+    ${state.sitesErrors.map((e) => `<p class="err">Seitenliste nicht geladen – ${esc(e)}</p>`).join('')}
+    ${state.demo ? '' : `<button class="more" id="add-account">＋ Weiteres Konto verbinden</button>
+    <p class="foot">Hier stehen alle Seiten, die im selben GoatCounter-Konto angelegt sind. Seiten mit eigenem Login sind eigene Konten und brauchen einen eigenen Token.</p>`}`);
   const body = $('#sheet-body');
   body.onclick = (ev) => {
     const b = ev.target.closest('[data-site]');
-    if (b) switchSite(state.sites[+b.dataset.site].base);
+    if (b) return switchSite(state.sites[+b.dataset.site].base);
+    if (ev.target.closest('#add-account')) { closeSheet(); state.gen++; renderSetup('', true); }
   };
   const token = (openDetail.token = {});
   const totals = state.sites.map((s) => api('/stats/total', p.q, s.base).then((r) => r.total || 0, () => null));
@@ -380,15 +437,17 @@ async function load() {
 
 function fail(e) {
   if (e instanceof AuthError) {
-    if (state.cfg?.home && state.cfg.base !== state.cfg.home) {
-      state.notice = `Der Token hat keinen Zugriff auf ${siteName()}.`;
-      state.cfg.base = state.cfg.home; saveCfg();
+    const home = state.cfg?.accounts?.[0]?.home;
+    if (home && state.cfg.base !== home) {
+      state.notice = `Kein Zugriff auf ${siteName()}: ${e.message}`;
+      state.cfg.base = home; saveCfg();
       state.gen++;
       render();
       return true;
     }
     const site = state.cfg?.site;
     localStorage.removeItem(CFG_KEY);
+    clearCache();
     state.cfg = { site };
     renderSetup(e.message + ' Bitte Token neu eingeben.');
     state.cfg = null;
@@ -582,13 +641,13 @@ function openSettings() {
     <ul class="list">
       <li><a class="row" href="${esc(base)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">
         <span class="name"><b>Original-Dashboard öffnen</b><small>${esc(base.replace(/^https?:\/\//, ''))}</small></span><span class="chev">↗</span></a></li>
-      <li><button class="row" id="logout"><span class="name"><b style="color:var(--down)">${state.demo ? 'Demo verlassen' : 'Verbindung trennen'}</b>
-        <small>${state.demo ? 'Zur Anmeldung' : 'Löscht den Token von diesem Gerät'}</small></span></button></li>
+      <li><button class="row" id="logout"><span class="name"><b style="color:var(--down)">${state.demo ? 'Demo verlassen' : 'Alle Verbindungen trennen'}</b>
+        <small>${state.demo ? 'Zur Anmeldung' : 'Löscht alle Token von diesem Gerät'}</small></span></button></li>
     </ul>
     <p class="foot">Tipp: Über „Teilen → Zum Home-Bildschirm“ wird GoatPocket zur App.</p>`);
   $('#logout').onclick = () => {
     localStorage.removeItem(CFG_KEY);
-    state.cfg = null; state.demo = false; state.sites = []; cache.clear();
+    state.cfg = null; state.demo = false; state.sites = []; clearCache();
     history.replaceState(null, '', location.pathname);
     closeSheet(); render();
   };

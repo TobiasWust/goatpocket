@@ -1,7 +1,7 @@
 // Service Worker: macht GoatPocket installierbar und lässt die App-Hülle offline starten.
 // Strategie "Netz zuerst": neue Deploys kommen sofort an, der Cache ist nur der Notnagel.
 // API-Aufrufe an GoatCounter (andere Origin) werden nicht angefasst.
-const CACHE = 'goatpocket-v1';
+const CACHE = 'goatpocket-v2';
 const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest', 'icon.svg', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (ev) => {
