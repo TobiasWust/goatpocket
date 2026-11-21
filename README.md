@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://goatpocket.com">Website</a> ·
-  <a href="https://goatpocket.com/app/?demo">Live demo</a> ·
+  <a href="https://app.goatpocket.com/?demo">Live demo</a> ·
   <a href="docs/help.md">Help</a> ·
   <a href="docs/self-hosting.md">Self-hosting</a> ·
   <a href="CONTRIBUTING.md">Contributing</a>
@@ -45,11 +45,11 @@
 
 1. In GoatCounter, open **User → API** and create a token with **Read statistics** (and optionally **Read sites** for
    the site switcher).
-2. Open [goatpocket.com/app/](https://goatpocket.com/app/), enter your site code (`mysite` for
+2. Open [app.goatpocket.com](https://app.goatpocket.com/), enter your site code (`mysite` for
    `mysite.goatcounter.com`) or your own domain, and paste the token.
 3. Add it to your home screen: **Share → Add to Home Screen** on iOS, **Install app** on Android/desktop.
 
-Just curious? Try the [demo with made-up numbers](https://goatpocket.com/app/?demo).
+Just curious? Try the [demo with made-up numbers](https://app.goatpocket.com/?demo).
 
 More in the [help](docs/help.md), including troubleshooting.
 

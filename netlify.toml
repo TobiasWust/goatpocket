@@ -25,11 +25,44 @@
   [headers.values]
     Cache-Control = "no-cache"
 
-# GoatPocket moved from goatpocket.wust.io to goatpocket.com. Keep the old domain
-# (and www) as domain aliases on the Netlify site so these redirects can answer.
+[[headers]]
+  for = "/app/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+# On app.goatpocket.com the manifest is requested at the root path.
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+
+# The website is served at goatpocket.com, the app at app.goatpocket.com. Both come from
+# this one Netlify site: requests to the app domain are rewritten to the /app/ folder.
+# All domains below must be set as domains of the Netlify site for these rules to answer.
+
+# App domain: the shared icons live outside /app/, everything else inside it.
+[[redirects]]
+  from = "https://app.goatpocket.com/icons/*"
+  to = "/icons/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "https://app.goatpocket.com/*"
+  to = "/app/:splat"
+  status = 200
+  force = true
+
+# Old app addresses now point to the app domain.
+[[redirects]]
+  from = "https://goatpocket.com/app/*"
+  to = "https://app.goatpocket.com/:splat"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "https://goatpocket.wust.io/*"
-  to = "https://goatpocket.com/:splat"
+  to = "https://app.goatpocket.com/:splat"
   status = 301
   force = true
 

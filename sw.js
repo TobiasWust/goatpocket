@@ -1,31 +1,19 @@
-// Service worker: makes GoatPocket installable and lets the app shell start offline.
+// Service worker for the website: lets the landing page start offline.
 // Strategy "network first": new deploys arrive immediately, the cache is only the
 // fallback. Calls to the GoatCounter API (another origin) are never touched.
 //
 // Bump VERSION when the list of files changes.
-const VERSION = 'v5';
+const VERSION = 'v6';
 const CACHE = `goatpocket-${VERSION}`;
+// The app has its own service worker (app/sw.js) and is served from app.goatpocket.com.
 const SHELL = [
   './',
   'index.html',
   'legal.html',
   'assets/landing.css',
   'assets/landing.js',
-  'app/',
-  'app/index.html',
-  'app/style.css',
-  'app/manifest.webmanifest',
-  'app/js/main.js',
-  'app/js/api.js',
-  'app/js/config.js',
-  'app/js/demo.js',
-  'app/js/i18n.js',
-  'app/js/period.js',
-  'app/js/util.js',
   'icons/icon.svg',
   'icons/icon-180.png',
-  'icons/icon-192.png',
-  'icons/icon-512.png',
 ];
 
 self.addEventListener('install', (ev) => {
@@ -48,8 +36,9 @@ self.addEventListener('activate', (ev) => {
 
 self.addEventListener('fetch', (ev) => {
   const req = ev.request;
-  const url = new URL(req.url);
-  if (req.method !== 'GET' || url.origin !== self.location.origin) return;
+  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  // /app/ belongs to the app (its own service worker, or a redirect to app.goatpocket.com).
+  if (new URL(req.url).pathname.startsWith('/app/')) return;
 
   ev.respondWith(
     fetch(req)
@@ -63,9 +52,7 @@ self.addEventListener('fetch', (ev) => {
       .catch(async () => {
         const hit = await caches.match(req, { ignoreSearch: true });
         if (hit || req.mode !== 'navigate') return hit || Response.error();
-        // Offline navigation to an unknown URL: fall back to the matching shell page.
-        const inApp = url.pathname.includes('/app/');
-        return caches.match(inApp ? 'app/index.html' : 'index.html');
+        return caches.match('index.html');
       }),
   );
 });

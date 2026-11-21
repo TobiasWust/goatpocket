@@ -50,7 +50,7 @@ server {
     add_header Referrer-Policy "no-referrer" always;
     add_header X-Content-Type-Options "nosniff" always;
 
-    location = /sw.js { add_header Cache-Control "no-cache"; }
+    location ~ /sw\.js$ { add_header Cache-Control "no-cache"; }
 }
 ```
 
@@ -66,6 +66,7 @@ pocket.example.com {
         X-Content-Type-Options "nosniff"
     }
     header /sw.js Cache-Control "no-cache"
+    header /app/sw.js Cache-Control "no-cache"
 }
 ```
 
@@ -97,5 +98,7 @@ The headers in `netlify.toml` are recommended for every deployment:
 - **Links** to the help pages point to this GitHub repository. They are set in `app/js/main.js` (`HELP_URL`) and in
   `index.html`.
 - **Landing page:** if you only want the app, you can replace `index.html` with a redirect to `app/`.
-- **Updates:** pull from upstream and redeploy. When you change the list of app files, bump `VERSION` in `sw.js` so
-  installed apps pick up the new cache.
+- **Updates:** pull from upstream and redeploy. When you change the list of app files, bump `VERSION` in `app/sw.js`
+  (the app) or `sw.js` (the website) so installed copies pick up the new cache.
+- **Own domain for the app:** goatpocket.com serves the app from `app.goatpocket.com` by rewriting that domain to
+  the `app/` folder (see `netlify.toml`). Self-hosted, the app simply stays at `app/` next to the website.

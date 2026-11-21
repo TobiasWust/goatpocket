@@ -27,7 +27,10 @@ const RANGE_KEY = 'goatpocket.range';
 const HELP_URL = 'https://github.com/TobiasWust/goatpocket/blob/main/docs/help.md';
 // Operator of this instance. Self-hosting? Point these to your own pages.
 const AUTHOR_URL = 'https://wust.dev/';
-const LEGAL_URL = '../legal.html';
+// On app.goatpocket.com the website lives on its own domain. Locally and when
+// self-hosted, the app sits in the app/ folder next to the website.
+const SITE_URL = location.hostname === 'app.goatpocket.com' ? 'https://goatpocket.com/' : '../';
+const LEGAL_URL = SITE_URL + 'legal.html';
 const KOFI_URL = 'https://ko-fi.com/tobiaswust';
 const MAX_LIMIT = 100; // the API returns at most 100 rows per request
 
@@ -618,7 +621,7 @@ function openSettings() {
         <span class="name"><b>${t('settings.language')}</b><small>${esc(LANGUAGES[lang])} → ${esc(LANGUAGES[nextLang])}</small></span></button></li>
       <li><a class="row link" href="${HELP_URL}" target="_blank" rel="noopener">
         <span class="name"><b>${t('settings.help')}</b><small>github.com/TobiasWust/goatpocket</small></span><span class="chev" aria-hidden="true">↗</span></a></li>
-      <li><a class="row link" href="../?about">
+      <li><a class="row link" href="${SITE_URL}?about">
         <span class="name"><b>${t('settings.about')}</b></span><span class="chev" aria-hidden="true">›</span></a></li>
       <li><button class="row" id="logout"><span class="name"><b class="danger">${t(state.demo ? 'settings.leaveDemo' : 'settings.disconnect')}</b>
         <small>${t(state.demo ? 'settings.leaveDemoSub' : 'settings.disconnectSub')}</small></span></button></li>
@@ -669,6 +672,6 @@ function disconnect() {
 
 /* ---------------------------------------------------------------- Start */
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('../sw.js').catch(() => {});
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 
 render();
