@@ -25,6 +25,20 @@
   [headers.values]
     Cache-Control = "no-cache"
 
+# GoatPocket moved from goatpocket.wust.io to goatpocket.com. Keep the old domain
+# (and www) as domain aliases on the Netlify site so these redirects can answer.
+[[redirects]]
+  from = "https://goatpocket.wust.io/*"
+  to = "https://goatpocket.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.goatpocket.com/*"
+  to = "https://goatpocket.com/:splat"
+  status = 301
+  force = true
+
 # Development and repository files are not part of the site.
 [[redirects]]
   from = "/node_modules/*"

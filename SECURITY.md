@@ -22,4 +22,4 @@ browser.
 
 ## Supported versions
 
-Only the latest version on `main` (deployed at <https://goatpocket.wust.io>) receives fixes.
+Only the latest version on `main` (deployed at <https://goatpocket.com>) receives fixes.

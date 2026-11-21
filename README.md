@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://goatpocket.wust.io">Website</a> ·
-  <a href="https://goatpocket.wust.io/app/?demo">Live demo</a> ·
+  <a href="https://goatpocket.com">Website</a> ·
+  <a href="https://goatpocket.com/app/?demo">Live demo</a> ·
   <a href="docs/help.md">Help</a> ·
   <a href="docs/self-hosting.md">Self-hosting</a> ·
   <a href="CONTRIBUTING.md">Contributing</a>
@@ -45,11 +45,11 @@
 
 1. In GoatCounter, open **User → API** and create a token with **Read statistics** (and optionally **Read sites** for
    the site switcher).
-2. Open [goatpocket.wust.io/app/](https://goatpocket.wust.io/app/), enter your site code (`mysite` for
+2. Open [goatpocket.com/app/](https://goatpocket.com/app/), enter your site code (`mysite` for
    `mysite.goatcounter.com`) or your own domain, and paste the token.
 3. Add it to your home screen: **Share → Add to Home Screen** on iOS, **Install app** on Android/desktop.
 
-Just curious? Try the [demo with made-up numbers](https://goatpocket.wust.io/app/?demo).
+Just curious? Try the [demo with made-up numbers](https://goatpocket.com/app/?demo).
 
 More in the [help](docs/help.md), including troubleshooting.
 
@@ -103,7 +103,7 @@ GoatPocket is free, open source and ad-free. If it's useful to you, you can
 
 ## License
 
-[MIT](LICENSE) © Tobias Wust · [Datenschutz & Impressum](https://goatpocket.wust.io/legal.html)
+[MIT](LICENSE) © Tobias Wust · [Datenschutz & Impressum](https://goatpocket.com/legal.html)
 
 ---
 

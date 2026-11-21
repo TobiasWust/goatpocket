@@ -1,7 +1,7 @@
 # Self-hosting GoatPocket
 
 GoatPocket is a folder of static files. There is nothing to build and nothing to run on a server – any host that can
-serve files over HTTPS will do. A public instance runs at <https://goatpocket.wust.io>; host your own if you prefer to
+serve files over HTTPS will do. A public instance runs at <https://goatpocket.com>; host your own if you prefer to
 control the code that handles your token.
 
 > This guide is about hosting **GoatPocket**. To host **GoatCounter** itself, see the
@@ -91,7 +91,7 @@ The headers in `netlify.toml` are recommended for every deployment:
 ## Customizing
 
 - **Legal pages and credits – please change these.** `legal.html` contains the privacy policy and imprint of the
-  operator of goatpocket.wust.io, including their name and address. Replace it with your own (or remove it and the links if
+  operator of goatpocket.com, including their name and address. Replace it with your own (or remove it and the links if
   you don't need one). The footer links to the author's site and Ko-fi are set in `index.html`, `legal.html` and at
   the top of `app/js/main.js` (`AUTHOR_URL`, `LEGAL_URL`, `KOFI_URL`).
 - **Links** to the help pages point to this GitHub repository. They are set in `app/js/main.js` (`HELP_URL`) and in

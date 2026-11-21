@@ -8,6 +8,7 @@ All notable changes to this project are documented here. The format is based on
 First public, open-source release.
 
 ### Added
+- New home: <https://goatpocket.com>. The old address goatpocket.wust.io redirects there.
 - Landing page at `/`; the app moved to `/app/`. Installed home-screen apps that still start at `/` are forwarded
   automatically.
 - English translation; the language follows the browser and can be switched in the settings.
