@@ -95,6 +95,8 @@ The headers in `netlify.toml` are recommended for every deployment:
   operator of goatpocket.com, including their name and address. Replace it with your own (or remove it and the links if
   you don't need one). The footer links to the author's site and Ko-fi are set in `index.html`, `legal.html` and at
   the top of `app/js/main.js` (`AUTHOR_URL`, `LEGAL_URL`, `KOFI_URL`).
+- **Visitor count – please remove.** `index.html` and `legal.html` load GoatCounter's `count.js`, which reports visits
+  to goatpocket.com's own GoatCounter site. Delete that `<script>` tag (or point it at your own GoatCounter site).
 - **Links** to the help pages point to this GitHub repository. They are set in `app/js/main.js` (`HELP_URL`) and in
   `index.html`.
 - **Landing page:** if you only want the app, you can replace `index.html` with a redirect to `app/`.

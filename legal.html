@@ -11,6 +11,8 @@
     <meta name="robots" content="noindex" />
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="assets/landing.css" />
+    <!-- Visitor count for goatpocket.com (no cookies, see legal.html). Self-hosting? Remove this. -->
+    <script data-goatcounter="https://goatpocket.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
   </head>
   <body>
     <!--
@@ -43,11 +45,15 @@
         <h2>2. Overview</h2>
         <p>
           GoatPocket is a dashboard for GoatCounter statistics that runs entirely in your browser. There is
-          <strong>no GoatPocket server, no accounts, no cookies, no advertising and no tracking</strong>. The only
-          parties involved are:
+          <strong>no GoatPocket server, no accounts, no cookies and no advertising</strong>, and the app itself contains
+          no tracking. The only parties involved are:
         </p>
         <ul>
           <li><strong>Netlify</strong>, which serves the GoatPocket files (section 5).</li>
+          <li>
+            <strong>GoatCounter</strong>, which counts visits to this website (goatpocket.com) without cookies (section
+            6).
+          </li>
           <li>
             <strong>Your GoatCounter instance</strong>, which your browser talks to directly once you connect it
             (section 4).
@@ -103,14 +109,32 @@
           this is safeguarded by standard contractual clauses.
         </p>
 
-        <h2>6. Retention</h2>
+        <h2>6. Visitor statistics (GoatCounter)</h2>
+        <p>
+          To see how many people visit this website, the pages on goatpocket.com use
+          <strong>GoatCounter</strong> (goatcounter.com), a privacy-friendly analytics service. When a page loads, a
+          small script from gc.zgo.at sends the page address, the referring page, the screen size, the browser and the
+          language to goatpocket.goatcounter.com. GoatCounter derives the country from your IP address but does not
+          store the IP address. It sets <strong>no cookies</strong> and does not track you across websites; visits are
+          only grouped by a short-lived anonymous session hash. The app at app.goatpocket.com is not counted.
+        </p>
+        <p>
+          <strong>Legal basis:</strong> Art. 6(1)(f) GDPR – our legitimate interest in knowing, in aggregate, how the
+          website is used. GoatCounter is operated by Martin Tournoij; see
+          <a href="https://www.goatcounter.com/privacy" target="_blank" rel="noopener noreferrer"
+            >goatcounter.com/privacy</a
+          >. You can block the script with any content blocker without affecting the app.
+        </p>
+
+        <h2>7. Retention</h2>
         <ul>
           <li>Data on your device stays there until you delete it.</li>
           <li>Cached statistics are no longer used after five minutes and are deleted on the next fetch.</li>
           <li>Netlify keeps server logs only for as long as technically necessary.</li>
+          <li>GoatCounter keeps the aggregated visitor statistics until we delete them.</li>
         </ul>
 
-        <h2>7. Your rights</h2>
+        <h2>8. Your rights</h2>
         <p>
           Under the GDPR you have the right of access (Art. 15), rectification (Art. 16), erasure (Art. 17), restriction
           of processing (Art. 18), data portability (Art. 20) and to object to processing based on legitimate interests
@@ -121,7 +145,7 @@
           right to lodge a complaint with a data protection supervisory authority.
         </p>
 
-        <h2>8. Changes</h2>
+        <h2>9. Changes</h2>
         <p>We update this policy when the app or the legal requirements change. The current version always applies.</p>
       </section>
 

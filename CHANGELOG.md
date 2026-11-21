@@ -9,6 +9,7 @@ All notable changes to this project are documented here. The format is based on
 - The app moved to its own domain, <https://app.goatpocket.com>; goatpocket.com is the website. Old app addresses
   (goatpocket.com/app/ and goatpocket.wust.io) redirect there. The app has its own service worker (`app/sw.js`).
   Because the address changed, accounts have to be connected once more.
+- The website (not the app) counts visits with GoatCounter, without cookies; the privacy policy describes it.
 - Privacy policy and imprint (`legal.html`) are now in English. The old German anchors (`#datenschutz`,
   `#impressum`) keep working.
 
