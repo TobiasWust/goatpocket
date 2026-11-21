@@ -51,7 +51,7 @@ Want to look around first? Tap **Try the demo first** – it uses made-up number
 - **Details** – rows with a › can be tapped: a page shows where its visitors came from, a browser or system shows the
   versions, a location shows regions, a referrer shows the exact URLs.
 - **Refresh** (↻) – reloads everything and bypasses the cache.
-- **Settings** (sliders icon) – open the original GoatCounter dashboard, change the language, or disconnect.
+- **Settings** (sliders icon) – open the original GoatCounter dashboard, read the help, or disconnect.
 
 GoatCounter counts *visitors*, not page views. Totals in GoatPocket match GoatCounter's own dashboard, but small
 differences around midnight are possible because GoatCounter stores hourly numbers in UTC and GoatPocket regroups them

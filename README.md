@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://goatpocket.com">Website</a> ·
-  <a href="https://goatpocket.com/app/?demo">Live demo</a> ·
+  <a href="https://app.goatpocket.com/?demo">Live demo</a> ·
   <a href="docs/help.md">Help</a> ·
   <a href="docs/self-hosting.md">Self-hosting</a> ·
   <a href="CONTRIBUTING.md">Contributing</a>
@@ -37,7 +37,6 @@
 - **Private by design** – the token is stored only in your browser and sent only to your GoatCounter instance. There is
   no GoatPocket server.
 - **Installable PWA** with an offline-ready app shell, light and dark mode.
-- **English and German**, picked from your browser (switchable in the settings).
 - **Respects GoatCounter's rate limit**: requests are throttled, retried and cached for five minutes.
 - **Works with self-hosted GoatCounter** on any HTTPS domain.
 
@@ -45,11 +44,11 @@
 
 1. In GoatCounter, open **User → API** and create a token with **Read statistics** (and optionally **Read sites** for
    the site switcher).
-2. Open [goatpocket.com/app/](https://goatpocket.com/app/), enter your site code (`mysite` for
+2. Open [app.goatpocket.com](https://app.goatpocket.com), enter your site code (`mysite` for
    `mysite.goatcounter.com`) or your own domain, and paste the token.
 3. Add it to your home screen: **Share → Add to Home Screen** on iOS, **Install app** on Android/desktop.
 
-Just curious? Try the [demo with made-up numbers](https://goatpocket.com/app/?demo).
+Just curious? Try the [demo with made-up numbers](https://app.goatpocket.com/?demo).
 
 More in the [help](docs/help.md), including troubleshooting.
 
@@ -62,7 +61,7 @@ response cache) lives in `localStorage` on your device.
 
 ```
 index.html          landing page
-legal.html          privacy policy and imprint (German)
+legal.html          privacy policy and imprint
 app/                the app (index.html, style.css, js/ modules)
 icons/              app icons
 assets/             landing page styles, scripts and screenshots
@@ -103,7 +102,7 @@ GoatPocket is free, open source and ad-free. If it's useful to you, you can
 
 ## License
 
-[MIT](LICENSE) © Tobias Wust · [Datenschutz & Impressum](https://goatpocket.com/legal.html)
+[MIT](LICENSE) © Tobias Wust · [Privacy & imprint](https://goatpocket.com/legal.html)
 
 ---
 

@@ -3,7 +3,7 @@
 // fallback. Calls to the GoatCounter API (another origin) are never touched.
 //
 // Bump VERSION when the list of files changes.
-const VERSION = 'v5';
+const VERSION = 'v6';
 const CACHE = `goatpocket-${VERSION}`;
 const SHELL = [
   './',
@@ -64,7 +64,8 @@ self.addEventListener('fetch', (ev) => {
         const hit = await caches.match(req, { ignoreSearch: true });
         if (hit || req.mode !== 'navigate') return hit || Response.error();
         // Offline navigation to an unknown URL: fall back to the matching shell page.
-        const inApp = url.pathname.includes('/app/');
+        // The app lives under /app/, or at the root of its own subdomain (app.goatpocket.com).
+        const inApp = url.pathname.includes('/app/') || self.location.hostname.startsWith('app.');
         return caches.match(inApp ? 'app/index.html' : 'index.html');
       }),
   );

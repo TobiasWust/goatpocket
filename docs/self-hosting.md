@@ -25,6 +25,13 @@ HTTPS is required: service workers and the installable app only work on secure o
 The repository contains a ready-made [`netlify.toml`](../netlify.toml). Fork the repository, create a new Netlify site
 from it, and leave the build command empty. Every push to `main` is deployed.
 
+### App on its own subdomain
+
+goatpocket.com serves the landing page and app.goatpocket.com the app – both from the same Netlify site. The
+`[[redirects]]` in `netlify.toml` rewrite `app.<domain>/*` to `/app/`. To copy that setup, add both domains to your
+Netlify site and replace `goatpocket.com` in those rules (and `SITE_URL` in `app/js/main.js`). Without a subdomain,
+the app simply lives at `/app/`.
+
 ## GitHub Pages
 
 In your fork: *Settings → Pages → Deploy from a branch → `main` / root*. GitHub Pages can't set custom headers, so the

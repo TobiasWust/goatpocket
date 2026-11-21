@@ -8,13 +8,14 @@ All notable changes to this project are documented here. The format is based on
 First public, open-source release.
 
 ### Added
-- New home: <https://goatpocket.com>. The old address goatpocket.wust.io redirects there.
+- New home: the landing page is at <https://goatpocket.com>, the app at <https://app.goatpocket.com>. The old
+  address goatpocket.wust.io redirects there.
 - Landing page at `/`; the app moved to `/app/`. Installed home-screen apps that still start at `/` are forwarded
   automatically.
-- English translation; the language follows the browser and can be switched in the settings.
+- The app, landing page and documentation are in English.
 - Keyboard support for the chart (arrow keys).
 - Links to help and documentation in the app.
-- Privacy policy and imprint (`legal.html`), "Made with ❤️ by Wust" footer and Ko-fi link on the landing page and in
+- Privacy policy and imprint in English (`legal.html`), "Made with ❤️ by Wust" footer and Ko-fi link on the landing page and in
   the app.
 - Documentation: help, self-hosting guide, contributing guide, security policy.
 - Unit tests, ESLint, Prettier and a CI workflow.

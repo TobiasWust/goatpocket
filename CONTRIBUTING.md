@@ -44,7 +44,7 @@ CI runs `lint` and `test` on every pull request.
 | `app/js/api.js`      | GoatCounter API client: throttling, retries, in-memory + `localStorage` cache, `AuthError`.        |
 | `app/js/config.js`   | Saved accounts and sites, migration of old configs, mapping `/api/v0/sites` responses.             |
 | `app/js/period.js`   | Date ranges and grouping the API's hourly UTC numbers into local hours/days/weeks.                 |
-| `app/js/i18n.js`     | Translations (`t()`), language detection, shared `Intl` formatters.                                |
+| `app/js/i18n.js`     | All UI strings (`t()`) and shared `Intl` formatters.                                               |
 | `app/js/demo.js`     | Fake API for `?demo`, deterministic per hour.                                                      |
 | `app/js/util.js`     | `esc()`, `normalizeBase()`, safe `localStorage` wrapper and other helpers.                         |
 | `app/style.css`      | App styles; colors are tokens on `:root` with a dark-mode variant.                                 |
@@ -54,21 +54,18 @@ CI runs `lint` and `test` on every pull request.
 A few conventions:
 
 - **Rendering** is template strings + `innerHTML`. Every value that comes from the API or the user **must** go
-  through `esc()`. Translated strings are trusted (some contain `<b>`).
+  through `esc()`. Strings from `i18n.js` are trusted (some contain `<b>`).
 - **Stale responses:** `state.gen` is bumped on every reload; async work compares its generation before touching the
   DOM. Sheets use `openSheet()`'s token and `isSheetCurrent()` the same way.
 - **Pure logic goes into modules without DOM access** (`period.js`, `config.js`, `util.js`, …) so it can be unit
   tested in Node. Add tests in `test/` for anything non-trivial there.
 - When you add, rename or remove a file the app loads, update `SHELL` and bump `VERSION` in `sw.js`.
 
-## Translations
+## Wording
 
-GoatPocket speaks English and German. To add a language:
-
-1. In `app/js/i18n.js`, copy the `en` block in `STRINGS`, translate the values, and add the language to `LANGUAGES`.
-   Keep `{placeholders}` and any `<b>` tags.
-2. Optionally translate GoatCounter's screen size names in `SIZE_NAMES`.
-3. Run `npm test` – it checks that every key and placeholder exists in every language.
+GoatPocket is English-only. All UI text lives in `app/js/i18n.js` and is used through `t('key')` – please add new
+strings there instead of hard-coding them in templates. That keeps the wording consistent and leaves the door open
+for translations later.
 
 ## Reporting bugs
 

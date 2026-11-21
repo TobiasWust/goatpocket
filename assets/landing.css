@@ -425,11 +425,6 @@ h2 {
 .legal section {
   margin-top: 48px;
 }
-.legal-lang {
-  color: var(--muted);
-  font-size: 14px;
-  margin-top: 24px;
-}
 .legal h1 {
   font-size: clamp(30px, 5vw, 40px);
   letter-spacing: -0.03em;

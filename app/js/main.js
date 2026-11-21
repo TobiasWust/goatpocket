@@ -19,15 +19,18 @@ import {
   tokenFor,
 } from './config.js';
 import { DEMO_SITES, demoApi } from './demo.js';
-import { LANGUAGES, fmt, lang, setLanguage, sizeName, t } from './i18n.js';
+import { fmt, t } from './i18n.js';
 import { buildBuckets, period } from './period.js';
 import { $, esc, flag, normalizeBase, short, storage } from './util.js';
 
 const RANGE_KEY = 'goatpocket.range';
 const HELP_URL = 'https://github.com/TobiasWust/goatpocket/blob/main/docs/help.md';
+// The landing page. Served from /app/ the app finds it one level up; on its own
+// domain (app.goatpocket.com) it links to the main site.
+const SITE_URL = /\/app\/(index\.html)?$/.test(location.pathname) ? '../' : 'https://goatpocket.com/';
 // Operator of this instance. Self-hosting? Point these to your own pages.
 const AUTHOR_URL = 'https://wust.dev/';
-const LEGAL_URL = '../legal.html';
+const LEGAL_URL = `${SITE_URL}legal.html`;
 const KOFI_URL = 'https://ko-fi.com/tobiaswust';
 const MAX_LIMIT = 100; // the API returns at most 100 rows per request
 
@@ -81,8 +84,8 @@ function creditHtml({ kofi = 'kofi.short' } = {}) {
   const ext = 'target="_blank" rel="noopener noreferrer"';
   return `<div class="credit">
     <p>Made with <span class="heart">❤️</span> by <a href="${AUTHOR_URL}" ${ext}>Wust</a></p>
-    <p><a href="${LEGAL_URL}#datenschutz" target="_blank" rel="noopener">${t('legal.privacy')}</a> ·
-      <a href="${LEGAL_URL}#impressum" target="_blank" rel="noopener">${t('legal.imprint')}</a> ·
+    <p><a href="${LEGAL_URL}#privacy" target="_blank" rel="noopener">${t('legal.privacy')}</a> ·
+      <a href="${LEGAL_URL}#imprint" target="_blank" rel="noopener">${t('legal.imprint')}</a> ·
       <a href="${KOFI_URL}" ${ext}>${t(kofi)}</a></p>
   </div>`;
 }
@@ -102,7 +105,6 @@ function siteName() {
 const app = $('#app');
 
 function render() {
-  document.documentElement.lang = lang;
   $('#sheet-close').setAttribute('aria-label', t('common.close'));
   if (!state.cfg && !state.demo) return renderSetup();
   renderDashboard();
@@ -372,7 +374,6 @@ async function loadHero(gen, range, p) {
 function displayName(sec, item) {
   const raw = String(item.name ?? item.path ?? '').trim();
   if (!raw || raw === '(unknown)') return t(sec.blank || 'name.unknown');
-  if (sec.id === 'sizes') return sizeName(raw);
   if (sec.id === 'locations') {
     const f = flag(item.id);
     return f ? `${f} ${raw}` : raw;
@@ -605,8 +606,6 @@ async function openDetail(sec, item, p) {
 
 function openSettings() {
   const dashboard = state.demo ? 'https://www.goatcounter.com' : state.cfg.base;
-  const codes = Object.keys(LANGUAGES);
-  const nextLang = codes[(codes.indexOf(lang) + 1) % codes.length];
   openSheet(
     t('settings.title'),
     siteName(),
@@ -614,11 +613,9 @@ function openSettings() {
     <ul class="list">
       <li><a class="row link" href="${esc(dashboard)}" target="_blank" rel="noopener">
         <span class="name"><b>${t('settings.open')}</b><small>${esc(short(dashboard))}</small></span><span class="chev" aria-hidden="true">↗</span></a></li>
-      <li><button class="row" id="language">
-        <span class="name"><b>${t('settings.language')}</b><small>${esc(LANGUAGES[lang])} → ${esc(LANGUAGES[nextLang])}</small></span></button></li>
       <li><a class="row link" href="${HELP_URL}" target="_blank" rel="noopener">
         <span class="name"><b>${t('settings.help')}</b><small>github.com/TobiasWust/goatpocket</small></span><span class="chev" aria-hidden="true">↗</span></a></li>
-      <li><a class="row link" href="../?about">
+      <li><a class="row link" href="${SITE_URL}?about">
         <span class="name"><b>${t('settings.about')}</b></span><span class="chev" aria-hidden="true">›</span></a></li>
       <li><button class="row" id="logout"><span class="name"><b class="danger">${t(state.demo ? 'settings.leaveDemo' : 'settings.disconnect')}</b>
         <small>${t(state.demo ? 'settings.leaveDemoSub' : 'settings.disconnectSub')}</small></span></button></li>
@@ -626,11 +623,6 @@ function openSettings() {
     <p class="foot">${t('settings.tip')}</p>
     ${creditHtml({ kofi: 'kofi.long' })}`,
   );
-  $('#language').onclick = () => {
-    setLanguage(nextLang);
-    closeSheet();
-    render();
-  };
   $('#logout').onclick = () => {
     closeSheet();
     // Leaving the demo must not wipe a real account that is also configured.

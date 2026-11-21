@@ -16,6 +16,11 @@
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
 [[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"
+
+[[headers]]
   for = "/app/manifest.webmanifest"
   [headers.values]
     Content-Type = "application/manifest+json"
@@ -25,8 +30,19 @@
   [headers.values]
     Cache-Control = "no-cache"
 
-# GoatPocket moved from goatpocket.wust.io to goatpocket.com. Keep the old domain
-# (and www) as domain aliases on the Netlify site so these redirects can answer.
+# Domains (all on this one Netlify site):
+#   goatpocket.com       landing page (primary domain)
+#   app.goatpocket.com   the app, served from /app/
+#   www.goatpocket.com, goatpocket.wust.io   aliases that redirect
+# Netlify uses the first matching rule.
+
+# Old domain: the app moved to the subdomain, everything else to the new domain.
+[[redirects]]
+  from = "https://goatpocket.wust.io/app/*"
+  to = "https://app.goatpocket.com/:splat"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "https://goatpocket.wust.io/*"
   to = "https://goatpocket.com/:splat"
@@ -38,6 +54,34 @@
   to = "https://goatpocket.com/:splat"
   status = 301
   force = true
+
+# goatpocket.com/app/ → app.goatpocket.com (the landing page links to app/ relatively,
+# so it also works locally and when self-hosted).
+[[redirects]]
+  from = "https://goatpocket.com/app/*"
+  to = "https://app.goatpocket.com/:splat"
+  status = 301
+  force = true
+
+# app.goatpocket.com: serve /app/ at the root. "/" must be forced because the landing
+# page's index.html exists there too. Everything else is a fallback (not forced), so
+# shared files at the site root – /icons/, /sw.js, /legal.html – are still served.
+[[redirects]]
+  from = "https://app.goatpocket.com/"
+  to = "/app/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "https://app.goatpocket.com/index.html"
+  to = "/app/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "https://app.goatpocket.com/*"
+  to = "/app/:splat"
+  status = 200
 
 # Development and repository files are not part of the site.
 [[redirects]]
