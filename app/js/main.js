@@ -84,8 +84,8 @@ function creditHtml({ kofi = 'kofi.short' } = {}) {
   const ext = 'target="_blank" rel="noopener noreferrer"';
   return `<div class="credit">
     <p>Made with <span class="heart">❤️</span> by <a href="${AUTHOR_URL}" ${ext}>Wust</a></p>
-    <p><a href="${LEGAL_URL}#datenschutz" target="_blank" rel="noopener">${t('legal.privacy')}</a> ·
-      <a href="${LEGAL_URL}#impressum" target="_blank" rel="noopener">${t('legal.imprint')}</a> ·
+    <p><a href="${LEGAL_URL}#privacy" target="_blank" rel="noopener">${t('legal.privacy')}</a> ·
+      <a href="${LEGAL_URL}#imprint" target="_blank" rel="noopener">${t('legal.imprint')}</a> ·
       <a href="${KOFI_URL}" ${ext}>${t(kofi)}</a></p>
   </div>`;
 }

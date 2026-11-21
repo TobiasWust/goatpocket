@@ -3,7 +3,7 @@
 // fallback. Calls to the GoatCounter API (another origin) are never touched.
 //
 // Bump VERSION when the list of files changes.
-const VERSION = 'v6';
+const VERSION = 'v7';
 const CACHE = `goatpocket-${VERSION}`;
 // The app has its own service worker (app/sw.js) and is served from app.goatpocket.com.
 const SHELL = [

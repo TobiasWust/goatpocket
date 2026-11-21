@@ -62,7 +62,7 @@ response cache) lives in `localStorage` on your device.
 
 ```
 index.html          landing page
-legal.html          privacy policy and imprint (German)
+legal.html          privacy policy and imprint
 app/                the app (index.html, style.css, js/ modules)
 icons/              app icons
 assets/             landing page styles, scripts and screenshots
@@ -103,7 +103,7 @@ GoatPocket is free, open source and ad-free. If it's useful to you, you can
 
 ## License
 
-[MIT](LICENSE) © Tobias Wust · [Datenschutz & Impressum](https://goatpocket.com/legal.html)
+[MIT](LICENSE) © Tobias Wust · [Privacy & Imprint](https://goatpocket.com/legal.html)
 
 ---
 
