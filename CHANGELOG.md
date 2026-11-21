@@ -13,6 +13,8 @@ First public, open-source release.
 - English translation; the language follows the browser and can be switched in the settings.
 - Keyboard support for the chart (arrow keys).
 - Links to help and documentation in the app.
+- Privacy policy and imprint (`legal.html`), "Made with ❤️ by Wust" footer and Ko-fi link on the landing page and in
+  the app.
 - Documentation: help, self-hosting guide, contributing guide, security policy.
 - Unit tests, ESLint, Prettier and a CI workflow.
 - Content Security Policy and further security headers in `netlify.toml`.

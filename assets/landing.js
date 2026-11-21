@@ -4,7 +4,9 @@
 // root. When the page runs as an installed app, go straight to the dashboard.
 (function () {
   var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-  if (standalone) {
+  // "?about" is how the app links here on purpose (Settings → About GoatPocket).
+  var wantsLanding = /[?&]about\b/.test(window.location.search);
+  if (standalone && !wantsLanding) {
     window.location.replace('app/' + window.location.search);
     return;
   }

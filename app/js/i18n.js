@@ -101,6 +101,10 @@ export const STRINGS = {
     'settings.leaveDemoSub': 'Back to sign-in',
     'settings.tip': 'Tip: “Share → Add to Home Screen” turns GoatPocket into an app.',
     'common.close': 'Close',
+    'legal.privacy': 'Privacy',
+    'legal.imprint': 'Imprint',
+    'kofi.short': '☕ Buy me a coffee',
+    'kofi.long': '☕ Like GoatPocket? Buy me a coffee',
   },
 
   de: {
@@ -195,6 +199,10 @@ export const STRINGS = {
     'settings.leaveDemoSub': 'Zur Anmeldung',
     'settings.tip': 'Tipp: Über „Teilen → Zum Home-Bildschirm“ wird GoatPocket zur App.',
     'common.close': 'Schließen',
+    'legal.privacy': 'Datenschutz',
+    'legal.imprint': 'Impressum',
+    'kofi.short': '☕ Kaffee spendieren',
+    'kofi.long': '☕ Gefällt dir GoatPocket? Spendier mir einen Kaffee',
   },
 };
 

@@ -25,6 +25,10 @@ import { $, esc, flag, normalizeBase, short, storage } from './util.js';
 
 const RANGE_KEY = 'goatpocket.range';
 const HELP_URL = 'https://github.com/TobiasWust/goatpocket/blob/main/docs/help.md';
+// Operator of this instance. Self-hosting? Point these to your own pages.
+const AUTHOR_URL = 'https://wust.dev/';
+const LEGAL_URL = '../legal.html';
+const KOFI_URL = 'https://ko-fi.com/tobiaswust';
 const MAX_LIMIT = 100; // the API returns at most 100 rows per request
 
 const RANGES = [
@@ -71,6 +75,17 @@ const client = createClient({
   tokenFor: (base) => tokenFor(state.cfg, state.sites, base),
   demo: demoApi,
 });
+
+/** "Made with ❤️ by Wust" plus privacy, imprint and Ko-fi links. */
+function creditHtml({ kofi = 'kofi.short' } = {}) {
+  const ext = 'target="_blank" rel="noopener noreferrer"';
+  return `<div class="credit">
+    <p>Made with <span class="heart">❤️</span> by <a href="${AUTHOR_URL}" ${ext}>Wust</a></p>
+    <p><a href="${LEGAL_URL}#datenschutz" target="_blank" rel="noopener">${t('legal.privacy')}</a> ·
+      <a href="${LEGAL_URL}#impressum" target="_blank" rel="noopener">${t('legal.imprint')}</a> ·
+      <a href="${KOFI_URL}" ${ext}>${t(kofi)}</a></p>
+  </div>`;
+}
 
 const currentBase = () => (state.demo ? state.demoSite : state.cfg.base);
 const currentRange = () => RANGES.find((r) => r.id === state.range) || RANGES[1];
@@ -122,6 +137,7 @@ function renderSetup({ error = '', adding = false, prefill = '' } = {}) {
         <li>${t('setup.step3')}</li>
       </ol>
       <p class="foot"><a href="${HELP_URL}" target="_blank" rel="noopener">${t('setup.help')}</a></p>
+      ${creditHtml()}
     </form>`;
 
   $('#secondary').onclick = adding ? render : enterDemo;
@@ -184,7 +200,8 @@ function renderDashboard() {
           <h3>${t(`section.${s.id}`)}</h3><div class="body">${SKELETON}</div></section>`,
       ).join('')}
     </div>
-    <p class="foot" id="foot"></p>`;
+    <p class="foot" id="foot"></p>
+    ${creditHtml()}`;
   state.notice = '';
 
   $('.ranges').onclick = (ev) => {
@@ -601,12 +618,13 @@ function openSettings() {
         <span class="name"><b>${t('settings.language')}</b><small>${esc(LANGUAGES[lang])} → ${esc(LANGUAGES[nextLang])}</small></span></button></li>
       <li><a class="row link" href="${HELP_URL}" target="_blank" rel="noopener">
         <span class="name"><b>${t('settings.help')}</b><small>github.com/TobiasWust/goatpocket</small></span><span class="chev" aria-hidden="true">↗</span></a></li>
-      <li><a class="row link" href="../">
+      <li><a class="row link" href="../?about">
         <span class="name"><b>${t('settings.about')}</b></span><span class="chev" aria-hidden="true">›</span></a></li>
       <li><button class="row" id="logout"><span class="name"><b class="danger">${t(state.demo ? 'settings.leaveDemo' : 'settings.disconnect')}</b>
         <small>${t(state.demo ? 'settings.leaveDemoSub' : 'settings.disconnectSub')}</small></span></button></li>
     </ul>
-    <p class="foot">${t('settings.tip')}</p>`,
+    <p class="foot">${t('settings.tip')}</p>
+    ${creditHtml({ kofi: 'kofi.long' })}`,
   );
   $('#language').onclick = () => {
     setLanguage(nextLang);

@@ -62,6 +62,7 @@ response cache) lives in `localStorage` on your device.
 
 ```
 index.html          landing page
+legal.html          privacy policy and imprint (German)
 app/                the app (index.html, style.css, js/ modules)
 icons/              app icons
 assets/             landing page styles, scripts and screenshots
@@ -95,6 +96,15 @@ Copy the repository to any static host – Netlify, GitHub Pages, Cloudflare Pag
   GoatPocket is an independent project and not affiliated with GoatCounter. If GoatCounter is useful to you, consider
   [supporting it](https://www.goatcounter.com/contribute).
 
+## Support
+
+GoatPocket is free, open source and ad-free. If it's useful to you, you can
+[buy me a coffee on Ko-fi](https://ko-fi.com/tobiaswust) ☕
+
 ## License
 
-[MIT](LICENSE) © Tobias Wust
+[MIT](LICENSE) © Tobias Wust · [Datenschutz & Impressum](https://goatpocket.wust.io/legal.html)
+
+---
+
+Made with ❤️ by [Wust](https://wust.dev/)

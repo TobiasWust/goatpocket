@@ -12,7 +12,7 @@ control the code that handles your token.
 Deploy the repository root. These paths are needed at runtime:
 
 ```
-index.html   assets/   app/   icons/   sw.js
+index.html   legal.html   assets/   app/   icons/   sw.js
 ```
 
 Everything else (`docs/`, `test/`, `scripts/`, config files) is optional. The app works in a subfolder too
@@ -90,6 +90,10 @@ The headers in `netlify.toml` are recommended for every deployment:
 
 ## Customizing
 
+- **Legal pages and credits – please change these.** `legal.html` contains the privacy policy and imprint of the
+  operator of goatpocket.wust.io, including their name and address. Replace it with your own (or remove it and the links if
+  you don't need one). The footer links to the author's site and Ko-fi are set in `index.html`, `legal.html` and at
+  the top of `app/js/main.js` (`AUTHOR_URL`, `LEGAL_URL`, `KOFI_URL`).
 - **Links** to the help pages point to this GitHub repository. They are set in `app/js/main.js` (`HELP_URL`) and in
   `index.html`.
 - **Landing page:** if you only want the app, you can replace `index.html` with a redirect to `app/`.

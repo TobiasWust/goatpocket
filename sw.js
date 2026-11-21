@@ -3,11 +3,12 @@
 // fallback. Calls to the GoatCounter API (another origin) are never touched.
 //
 // Bump VERSION when the list of files changes.
-const VERSION = 'v4';
+const VERSION = 'v5';
 const CACHE = `goatpocket-${VERSION}`;
 const SHELL = [
   './',
   'index.html',
+  'legal.html',
   'assets/landing.css',
   'assets/landing.js',
   'app/',
