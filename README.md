@@ -19,7 +19,7 @@ Der Token liegt nur im `localStorage` des Geräts und wird ausschließlich an di
 
 ## Aufs Handy
 
-Live unter https://goatpocket.wust.io – jeder Push auf `main` wird von Netlify automatisch veröffentlicht. Die Adresse am Handy öffnen und über „Teilen → Zum Home-Bildschirm“ als App ablegen.
+Live unter https://goatpocket.com – jeder Push auf `main` wird von Netlify automatisch veröffentlicht. Die Adresse am Handy öffnen und über „Teilen → Zum Home-Bildschirm“ als App ablegen.
 
 ## Hinweise
 

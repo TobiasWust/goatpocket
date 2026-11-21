@@ -17,3 +17,10 @@
   for = "/sw.js"
   [headers.values]
     Cache-Control = "no-cache"
+
+# Alte Adresse auf die neue Domain umleiten
+[[redirects]]
+  from = "https://goatpocket.wust.io/*"
+  to = "https://goatpocket.com/:splat"
+  status = 301
+  force = true
