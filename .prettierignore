@@ -1,0 +1,5 @@
+node_modules/
+package-lock.json
+# Hand-formatted on purpose: one rule per line reads better for dense UI CSS.
+app/style.css
+*.md

@@ -1,26 +1,47 @@
+# Netlify deploys the repository root as-is; there is no build step.
 [build]
   publish = "."
-
-[[headers]]
-  for = "/manifest.webmanifest"
-  [headers.values]
-    Content-Type = "application/manifest+json"
+  command = ""
 
 [[headers]]
   for = "/*"
   [headers.values]
+    # Scripts only from this origin. API calls may go to any HTTPS host, because
+    # GoatCounter can be self-hosted on any domain. Inline styles are needed for the
+    # bar widths, which are set as CSS custom properties.
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https:; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'"
     Referrer-Policy = "no-referrer"
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/app/manifest.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"
 
 [[headers]]
   for = "/sw.js"
   [headers.values]
     Cache-Control = "no-cache"
 
-# Alte Adresse auf die neue Domain umleiten
+# GoatPocket moved from goatpocket.wust.io to goatpocket.com. Keep the old domain
+# (and www) as domain aliases on the Netlify site so these redirects can answer.
 [[redirects]]
   from = "https://goatpocket.wust.io/*"
   to = "https://goatpocket.com/:splat"
   status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.goatpocket.com/*"
+  to = "https://goatpocket.com/:splat"
+  status = 301
+  force = true
+
+# Development and repository files are not part of the site.
+[[redirects]]
+  from = "/node_modules/*"
+  to = "/404"
+  status = 404
   force = true

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>GoatPocket</title>
+    <meta name="description" content="A mobile dashboard for GoatCounter analytics." />
+    <meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="GoatPocket" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="referrer" content="no-referrer" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="../icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="../icons/icon-180.png" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="js/main.js" type="module"></script>
+  </head>
+  <body>
+    <main id="app"></main>
+
+    <!-- Bottom sheet used for details, the site switcher and settings. -->
+    <dialog id="sheet" class="sheet" closedby="any" aria-labelledby="sheet-title">
+      <div class="sheet-grip" aria-hidden="true"></div>
+      <div class="sheet-head">
+        <div>
+          <div class="sheet-kicker" id="sheet-kicker"></div>
+          <h2 id="sheet-title"></h2>
+        </div>
+        <form method="dialog">
+          <button class="icon-btn" id="sheet-close" aria-label="Close">✕</button>
+        </form>
+      </div>
+      <div class="sheet-body" id="sheet-body"></div>
+    </dialog>
+
+    <noscript><p class="noscript">GoatPocket needs JavaScript to talk to the GoatCounter API.</p></noscript>
+  </body>
+</html>
