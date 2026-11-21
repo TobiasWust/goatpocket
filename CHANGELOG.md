@@ -1,0 +1,31 @@
+# Changelog
+
+All notable changes to this project are documented here. The format is based on
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [1.0.0] – 2026-11-21
+
+First public, open-source release.
+
+### Added
+- Landing page at `/`; the app moved to `/app/`. Installed home-screen apps that still start at `/` are forwarded
+  automatically.
+- English translation; the language follows the browser and can be switched in the settings.
+- Keyboard support for the chart (arrow keys).
+- Links to help and documentation in the app.
+- Documentation: help, self-hosting guide, contributing guide, security policy.
+- Unit tests, ESLint, Prettier and a CI workflow.
+- Content Security Policy and further security headers in `netlify.toml`.
+
+### Changed
+- Code split into ES modules (`api`, `config`, `period`, `i18n`, `demo`, `util`).
+- Bottom sheets use the native `<dialog>` element (focus handling, Esc/back gesture, tap outside to close).
+- Demo data uses neutral example sites.
+
+### Fixed
+- Leaving the demo no longer deletes a real account that is also connected.
+- `localStorage` being unavailable (private mode, blocked storage) no longer breaks the app.
+
+## Before 1.0.0
+
+Private development: mobile dashboard, site switcher, multiple accounts, PWA, rate-limit handling.

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Help & documentation
+    url: https://github.com/TobiasWust/goatpocket/blob/main/docs/help.md
+    about: Connecting, permissions, troubleshooting.
+  - name: Security vulnerability
+    url: https://github.com/TobiasWust/goatpocket/security/advisories/new
+    about: Please report security problems privately.

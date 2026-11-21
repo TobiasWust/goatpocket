@@ -1,31 +1,100 @@
-# GoatPocket
+<p align="center">
+  <img src="icons/icon.svg" alt="" width="96" height="96">
+</p>
 
-Mobiles Dashboard für [GoatCounter](https://www.goatcounter.com). Reine statische Seite ohne Build-Schritt: `index.html`, `style.css`, `app.js`.
+<h1 align="center">GoatPocket</h1>
 
-## Starten
+<p align="center">
+  <b>Your <a href="https://www.goatcounter.com">GoatCounter</a> stats, made for your phone.</b><br>
+  A fast, installable dashboard – static files only, no backend, no tracking.
+</p>
 
-```bash
-python3 -m http.server 4173
+<p align="center">
+  <a href="https://goatpocket.wust.io">Website</a> ·
+  <a href="https://goatpocket.wust.io/app/?demo">Live demo</a> ·
+  <a href="docs/help.md">Help</a> ·
+  <a href="docs/self-hosting.md">Self-hosting</a> ·
+  <a href="CONTRIBUTING.md">Contributing</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/TobiasWust/goatpocket/actions/workflows/ci.yml"><img src="https://github.com/TobiasWust/goatpocket/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-e4572e" alt="MIT license"></a>
+</p>
+
+<p align="center">
+  <img src="assets/screenshot-light.png" alt="GoatPocket dashboard on a phone" width="300">
+</p>
+
+## Features
+
+- **Made for thumbs** – big numbers, a chart you can scrub with your finger, tap any row for a breakdown
+  (pages → referrers, browsers → versions, locations → regions, …).
+- **All the cards** you know from GoatCounter: pages, referrers, locations, browsers, systems, sizes, languages and
+  campaigns, for today, 7, 30, 90 days or 12 months, compared to the period before.
+- **Multiple sites and accounts** – a site switcher with visitor counts side by side; sites with their own login can be
+  added with their own token.
+- **Private by design** – the token is stored only in your browser and sent only to your GoatCounter instance. There is
+  no GoatPocket server.
+- **Installable PWA** with an offline-ready app shell, light and dark mode.
+- **English and German**, picked from your browser (switchable in the settings).
+- **Respects GoatCounter's rate limit**: requests are throttled, retried and cached for five minutes.
+- **Works with self-hosted GoatCounter** on any HTTPS domain.
+
+## Quick start
+
+1. In GoatCounter, open **User → API** and create a token with **Read statistics** (and optionally **Read sites** for
+   the site switcher).
+2. Open [goatpocket.wust.io/app/](https://goatpocket.wust.io/app/), enter your site code (`mysite` for
+   `mysite.goatcounter.com`) or your own domain, and paste the token.
+3. Add it to your home screen: **Share → Add to Home Screen** on iOS, **Install app** on Android/desktop.
+
+Just curious? Try the [demo with made-up numbers](https://goatpocket.wust.io/app/?demo).
+
+More in the [help](docs/help.md), including troubleshooting.
+
+## How it works
+
+GoatPocket is a static web app. The browser calls the
+[GoatCounter API](https://www.goatcounter.com/help/api) (`/api/v0/stats/…`) directly – GoatCounter sends CORS headers
+that allow this – and renders the results. Everything the app remembers (accounts, selected range, a five-minute
+response cache) lives in `localStorage` on your device.
+
+```
+index.html          landing page
+app/                the app (index.html, style.css, js/ modules)
+icons/              app icons
+assets/             landing page styles, scripts and screenshots
+sw.js               service worker (network first, cache as fallback)
+docs/               help and self-hosting guide
+test/               unit tests (node --test)
 ```
 
-Dann `http://localhost:4173` öffnen. Mit `?demo` läuft die App mit erfundenen Zahlen.
+## Development
 
-## Verbinden
+No build step, no runtime dependencies. You need a static file server and, for linting and tests, Node.js ≥ 20.11.
 
-1. In GoatCounter: **User → API** → neuen Token anlegen, **Read statistics** und **Read sites** ankreuzen.
-2. In GoatPocket den Seiten-Code (z. B. `meinprojekt`) und den Token eintragen.
+```bash
+npm install     # dev tools only: ESLint + Prettier
+npm start       # http://localhost:4173 (or: python3 -m http.server 4173)
+npm test        # unit tests
+npm run lint    # ESLint + Prettier check
+```
 
-Der Token liegt nur im `localStorage` des Geräts und wird ausschließlich an die eigene GoatCounter-Seite geschickt (`/api/v0/...`, CORS ist dort offen).
+Open `http://localhost:4173/app/?demo` to work without a GoatCounter account. See [CONTRIBUTING.md](CONTRIBUTING.md)
+for the code tour and how to add a translation.
 
-## Aufs Handy
+## Self-hosting
 
-Live unter https://goatpocket.wust.io – jeder Push auf `main` wird von Netlify automatisch veröffentlicht. Die Adresse am Handy öffnen und über „Teilen → Zum Home-Bildschirm“ als App ablegen.
+Copy the repository to any static host – Netlify, GitHub Pages, Cloudflare Pages, nginx, Caddy, a bucket. The
+[self-hosting guide](docs/self-hosting.md) has examples and the recommended security headers.
 
-## Hinweise
+## Related
 
-- PWA: `sw.js` cached die App-Hülle (Netz zuerst, Cache als Rückfall); Statistiken brauchen weiterhin eine Verbindung.
-- Mit der Token-Berechtigung **Read sites** erscheint oben ein Umschalter für alle Seiten des Kontos.
+- [GoatCounter](https://github.com/arp242/goatcounter) – the privacy-friendly analytics platform this app is built for.
+  GoatPocket is an independent project and not affiliated with GoatCounter. If GoatCounter is useful to you, consider
+  [supporting it](https://www.goatcounter.com/contribute).
 
-- GoatCounter erlaubt 4 Anfragen pro Sekunde, und die CORS-Vorabanfrage des Browsers zählt mit. Die App macht deshalb höchstens 2 API-Aufrufe pro Sekunde und versucht abgelehnte Aufrufe erneut; ein kompletter Ladevorgang dauert rund 6 Sekunden. Antworten werden 5 Minuten auf dem Gerät zwischengespeichert.
-- Seiten mit eigenem GoatCounter-Login sind eigene Konten: über den Seiten-Umschalter → „Weiteres Konto verbinden“ mit eigenem Token hinzufügen.
-- Die Balken werden aus den Stundenwerten der API (UTC) in lokaler Zeit zusammengesetzt.
+## License
+
+[MIT](LICENSE) © Tobias Wust

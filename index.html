@@ -1,38 +1,227 @@
 <!doctype html>
-<html lang="de">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>GoatPocket</title>
-  <meta name="description" content="Mobiles Dashboard für GoatCounter">
-  <meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="GoatPocket">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="referrer" content="no-referrer">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icon-180.png">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div id="app"></div>
-  <div id="sheet" class="sheet" hidden>
-    <div class="sheet-backdrop" data-close></div>
-    <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
-      <div class="sheet-grip" data-close></div>
-      <div class="sheet-head">
-        <div>
-          <div class="sheet-kicker" id="sheet-kicker"></div>
-          <h2 id="sheet-title"></h2>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>GoatPocket – GoatCounter stats for your phone</title>
+    <meta
+      name="description"
+      content="GoatPocket is a free, open-source mobile dashboard for GoatCounter. Installable, private by design, no backend."
+    />
+    <meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)" />
+    <meta name="referrer" content="no-referrer" />
+    <meta property="og:title" content="GoatPocket" />
+    <meta property="og:description" content="Your GoatCounter stats, made for your phone." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://goatpocket.wust.io/assets/screenshot-light.png" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/icon-180.png" />
+    <link rel="stylesheet" href="assets/landing.css" />
+    <!-- Sends people who open the installed home-screen app straight to the dashboard. -->
+    <script src="assets/landing.js"></script>
+  </head>
+  <body>
+    <header class="nav wrap">
+      <a class="logo" href="./">
+        <img src="icons/icon.svg" alt="" width="32" height="32" />
+        <span>GoatPocket</span>
+      </a>
+      <nav aria-label="Main">
+        <a href="#features">Features</a>
+        <a href="#faq">Help</a>
+        <a href="https://github.com/TobiasWust/goatpocket">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero wrap">
+        <div class="hero-text">
+          <p class="kicker">A pocket-sized companion for GoatCounter</p>
+          <h1>Your GoatCounter stats, made for your phone.</h1>
+          <p class="lead">
+            GoatPocket is a fast, installable dashboard for
+            <a href="https://www.goatcounter.com">GoatCounter</a> analytics. No backend, no sign-up, no tracking – just
+            your numbers, one thumb away.
+          </p>
+          <div class="cta">
+            <a class="btn primary" href="app/" id="open-app">Open the app</a>
+            <a class="btn" href="app/?demo">Try the demo</a>
+          </div>
+          <p class="meta">Free &amp; open source · MIT licensed · Works with goatcounter.com and self-hosted</p>
         </div>
-        <button class="icon-btn" data-close aria-label="Schließen">✕</button>
-      </div>
-      <div class="sheet-body" id="sheet-body"></div>
-    </div>
-  </div>
-  <script src="app.js" type="module"></script>
-</body>
+        <div class="hero-shot">
+          <div class="phone">
+            <picture>
+              <source srcset="assets/screenshot-dark.png" media="(prefers-color-scheme: dark)" />
+              <img
+                src="assets/screenshot-light.png"
+                alt="GoatPocket dashboard showing visitors for the last 7 days, a bar chart and the top pages"
+                width="390"
+                height="844"
+                fetchpriority="high"
+              />
+            </picture>
+          </div>
+        </div>
+      </section>
+
+      <section class="features wrap" id="features" aria-labelledby="features-title">
+        <h2 id="features-title">Everything you check daily, nothing you don’t</h2>
+        <div class="feature-grid">
+          <article>
+            <span class="emoji" aria-hidden="true">👍</span>
+            <h3>Built for thumbs</h3>
+            <p>
+              Big numbers, a swipeable chart, and tap-to-drill-down on pages, referrers, locations, browsers and
+              systems.
+            </p>
+          </article>
+          <article>
+            <span class="emoji" aria-hidden="true">🔒</span>
+            <h3>Private by design</h3>
+            <p>
+              Your API token stays in your browser and is only sent to your own GoatCounter site. There is no GoatPocket
+              server.
+            </p>
+          </article>
+          <article>
+            <span class="emoji" aria-hidden="true">🗂️</span>
+            <h3>All your sites</h3>
+            <p>
+              Switch between every site in your account, see their visitors side by side, and add further accounts with
+              their own tokens.
+            </p>
+          </article>
+          <article>
+            <span class="emoji" aria-hidden="true">📲</span>
+            <h3>Installable</h3>
+            <p>Add it to your home screen and it behaves like an app – with an offline-ready shell and dark mode.</p>
+          </article>
+          <article>
+            <span class="emoji" aria-hidden="true">🐐</span>
+            <h3>Gentle on the API</h3>
+            <p>
+              Requests are throttled to GoatCounter’s rate limit, retried when needed and cached for five minutes on
+              your device.
+            </p>
+          </article>
+          <article>
+            <span class="emoji" aria-hidden="true">🧩</span>
+            <h3>No build step</h3>
+            <p>
+              Plain HTML, CSS and JavaScript modules. Read it in an afternoon, host it anywhere static files can live.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="steps wrap" aria-labelledby="steps-title">
+        <h2 id="steps-title">Connected in a minute</h2>
+        <ol>
+          <li>
+            <h3>Create a token</h3>
+            <p>
+              In GoatCounter open <b>User → API</b> and create a token with <b>Read statistics</b> and
+              <b>Read sites</b>.
+            </p>
+          </li>
+          <li>
+            <h3>Connect</h3>
+            <p>
+              Open GoatPocket and enter your site code (the part before <code>.goatcounter.com</code>) or your own
+              domain, plus the token.
+            </p>
+          </li>
+          <li>
+            <h3>Pocket it</h3>
+            <p>Use <b>Share → Add to Home Screen</b> (iOS) or <b>Install app</b> (Android, desktop).</p>
+          </li>
+        </ol>
+      </section>
+
+      <section class="privacy wrap" aria-labelledby="privacy-title">
+        <div class="privacy-card">
+          <div>
+            <h2 id="privacy-title">Your browser talks to GoatCounter. Nobody else.</h2>
+            <p>
+              GoatPocket is just a static page. It calls the
+              <a href="https://www.goatcounter.com/help/api">GoatCounter API</a> directly from your device, so your
+              token and your statistics never pass through a third party. Disconnecting removes everything from the
+              device.
+            </p>
+          </div>
+          <div class="flow" aria-hidden="true">
+            <span class="node">📱 Your phone</span>
+            <span class="arrow">⇄</span>
+            <span class="node">🐐 yoursite.goatcounter.com</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="faq wrap" id="faq" aria-labelledby="faq-title">
+        <h2 id="faq-title">Questions</h2>
+        <details>
+          <summary>Is this an official GoatCounter app?</summary>
+          <p>
+            No. GoatPocket is an independent open-source project that uses GoatCounter’s public API. GoatCounter itself
+            is made by Martin Tournoij – if you like it, consider
+            <a href="https://www.goatcounter.com/contribute">supporting it</a>.
+          </p>
+        </details>
+        <details>
+          <summary>Does it work with a self-hosted GoatCounter?</summary>
+          <p>
+            Yes. Enter the full address of your instance (for example <code>stats.example.com</code>). It needs to be
+            reachable over HTTPS from your phone.
+          </p>
+        </details>
+        <details>
+          <summary>Why does the first load take a few seconds?</summary>
+          <p>
+            GoatCounter allows four API requests per second and the dashboard needs about a dozen. GoatPocket spaces
+            them out instead of hitting the limit, and caches responses so the next visit is instant.
+          </p>
+        </details>
+        <details>
+          <summary>Which token permissions do I need?</summary>
+          <p>
+            <b>Read statistics</b> is required. <b>Read sites</b> is optional and enables the site switcher. GoatPocket
+            never writes anything.
+          </p>
+        </details>
+        <details>
+          <summary>Can I host my own copy?</summary>
+          <p>
+            Sure – it’s a folder of static files. See the
+            <a href="https://github.com/TobiasWust/goatpocket/blob/main/docs/self-hosting.md">self-hosting guide</a>.
+          </p>
+        </details>
+        <p class="more-help">
+          More in the <a href="https://github.com/TobiasWust/goatpocket/blob/main/docs/help.md">help &amp; docs</a>.
+        </p>
+      </section>
+
+      <section class="final wrap">
+        <h2>Ready when you are.</h2>
+        <div class="cta">
+          <a class="btn primary" href="app/">Open the app</a>
+          <a class="btn" href="https://github.com/TobiasWust/goatpocket">Star on GitHub</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot wrap">
+      <p>
+        GoatPocket is free software under the
+        <a href="https://github.com/TobiasWust/goatpocket/blob/main/LICENSE">MIT license</a>. Not affiliated with
+        GoatCounter.
+      </p>
+      <p>
+        <a href="https://github.com/TobiasWust/goatpocket">Source</a> ·
+        <a href="https://github.com/TobiasWust/goatpocket/issues">Report an issue</a> ·
+        <a href="https://www.goatcounter.com">GoatCounter</a>
+      </p>
+    </footer>
+  </body>
 </html>
