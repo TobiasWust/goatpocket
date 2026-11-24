@@ -11,12 +11,43 @@ export const isoHour = (ms) => new Date(Math.round(ms / HOUR) * HOUR).toISOStrin
  * same length right before it for the comparison.
  */
 export function period(days, now = new Date()) {
-  const midnight = new Date(now);
-  midnight.setHours(0, 0, 0, 0);
-  const end = new Date(midnight);
-  end.setHours(23);
-  const start = new Date(midnight);
+  const start = new Date(now);
+  start.setHours(0, 0, 0, 0);
   start.setDate(start.getDate() - (days - 1));
+  return periodBetween(start, now);
+}
+
+/** Local midnight of a "YYYY-MM-DD" string, or null if it isn't a valid date. */
+export function parseDay(value) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '');
+  if (!m) return null;
+  const d = new Date(+m[1], m[2] - 1, +m[3]);
+  return d.getDate() === +m[3] && d.getMonth() === m[2] - 1 ? d : null;
+}
+
+/** "YYYY-MM-DD" of a local date, the format of <input type="date">. */
+export const formatDay = (date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+/**
+ * All local calendar days from `from` to `to` (both included, in any order), plus the
+ * period of the same length right before it for the comparison.
+ */
+export function periodBetween(from, to) {
+  let start = new Date(from);
+  let last = new Date(to);
+  start.setHours(0, 0, 0, 0);
+  last.setHours(0, 0, 0, 0);
+  if (start > last) [start, last] = [last, start];
+  // Count calendar days, not 24-hour blocks, so a DST switch inside doesn't matter.
+  const days =
+    Math.round(
+      (Date.UTC(last.getFullYear(), last.getMonth(), last.getDate()) -
+        Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())) /
+        (24 * HOUR),
+    ) + 1;
+  const end = new Date(last);
+  end.setHours(23);
   const prevStart = new Date(start);
   prevStart.setDate(prevStart.getDate() - days);
   return {

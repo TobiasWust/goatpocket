@@ -4,7 +4,7 @@ process.env.TZ = 'Europe/Berlin';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { buildBuckets, bucketMode, isoHour, period } from '../app/js/period.js';
+import { buildBuckets, bucketMode, formatDay, isoHour, parseDay, period, periodBetween } from '../app/js/period.js';
 
 const NOW = new Date('2026-03-31T10:30:00+02:00');
 
@@ -62,4 +62,22 @@ test('buildBuckets groups long ranges by week (Monday first)', () => {
   const buckets = buildBuckets([], p);
   assert.ok(buckets.length >= 52 && buckets.length <= 54);
   assert.ok(buckets.slice(1).every((b) => new Date(b.key).getDay() === 1));
+});
+
+test('periodBetween covers a free range of local days and the period before', () => {
+  const p = periodBetween(new Date(2026, 2, 31), new Date(2026, 2, 25)); // order doesn't matter
+  assert.deepEqual(p, period(7, NOW));
+});
+
+test('periodBetween with a single day is one day in hour buckets', () => {
+  const p = periodBetween(new Date(2026, 2, 29), new Date(2026, 2, 29));
+  assert.equal(p.days, 1);
+  assert.equal(bucketMode(p.days), 'hour');
+});
+
+test('parseDay and formatDay round-trip and reject nonsense', () => {
+  assert.equal(formatDay(parseDay('2026-03-05')), '2026-03-05');
+  assert.equal(parseDay('2026-02-30'), null);
+  assert.equal(parseDay('gestern'), null);
+  assert.equal(parseDay(null), null);
 });

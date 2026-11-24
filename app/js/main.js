@@ -20,10 +20,11 @@ import {
 } from './config.js';
 import { DEMO_SITES, demoApi } from './demo.js';
 import { LANGUAGES, fmt, lang, setLanguage, sizeName, t } from './i18n.js';
-import { buildBuckets, period } from './period.js';
+import { buildBuckets, formatDay, parseDay, period, periodBetween } from './period.js';
 import { $, esc, flag, normalizeBase, short, storage } from './util.js';
 
 const RANGE_KEY = 'goatpocket.range';
+const CUSTOM_KEY = 'goatpocket.customRange';
 const HELP_URL = 'https://github.com/TobiasWust/goatpocket/blob/main/docs/help.md';
 // Operator of this instance. Self-hosting? Point these to your own pages.
 const AUTHOR_URL = 'https://wust.dev/';
@@ -63,6 +64,8 @@ const state = {
   demo: new URLSearchParams(location.search).has('demo'),
   demoSite: DEMO_SITES[0].base,
   range: storage.get(RANGE_KEY) || '7',
+  // Freely picked range: { from, to } as "YYYY-MM-DD" (local days).
+  custom: storage.getJSON(CUSTOM_KEY),
   // Bumped whenever the dashboard reloads; responses for an older generation are dropped.
   gen: 0,
   limits: {},
@@ -91,7 +94,32 @@ function creditHtml({ kofi = 'kofi.short' } = {}) {
 }
 
 const currentBase = () => (state.demo ? state.demoSite : state.cfg.base);
-const currentRange = () => RANGES.find((r) => r.id === state.range) || RANGES[1];
+function currentRange() {
+  if (state.range === 'custom') {
+    const from = parseDay(state.custom?.from);
+    const to = parseDay(state.custom?.to);
+    if (from && to) return { id: 'custom', from, to };
+  }
+  return RANGES.find((r) => r.id === state.range) || RANGES[1];
+}
+const rangePeriod = (range) => (range.id === 'custom' ? periodBetween(range.from, range.to) : period(range.days));
+
+/** "7 days", or for a custom range the dates themselves ("3 Nov – 12 Nov"). */
+function rangeLabel(range) {
+  if (range.id !== 'custom') return t(`range.${range.id}`);
+  const p = rangePeriod(range);
+  const year = new Date().getFullYear();
+  const f =
+    new Date(p.startMs).getFullYear() === year && new Date(p.endMs).getFullYear() === year
+      ? fmt().date
+      : fmt().dateYear;
+  return f.formatRange(p.startMs, p.endMs);
+}
+function prevRangeLabel(range) {
+  if (range.id !== 'custom') return t(`range.${range.id}.prev`);
+  const { days } = rangePeriod(range);
+  return days === 1 ? t('range.custom.prevDay') : t('range.custom.prev', { count: num(days) });
+}
 const api = (path, params = {}, base = currentBase()) => client.get(path, params, base);
 const num = (n) => fmt().number.format(n);
 
@@ -194,8 +222,7 @@ function renderDashboard() {
     ${state.demo ? `<div class="banner"><span>${t('dash.demoBanner')}</span><button id="exit-demo">${t('dash.connectOwn')}</button></div>` : ''}
     ${state.notice ? `<div class="banner" role="status"><span>${esc(state.notice)}</span></div>` : ''}
     <nav class="ranges" aria-label="${esc(t('range.nav'))}">
-      ${RANGES.map((r) => `<button class="chip" data-range="${r.id}" aria-pressed="${r.id === state.range}">${t(`range.${r.id}`)}</button>`).join('')}
-    </nav>
+${chipsHtml()}</nav>
     <section class="card hero" id="hero" aria-live="polite"></section>
     <div class="grid">
       ${SECTIONS.map(
@@ -209,12 +236,9 @@ function renderDashboard() {
 
   $('.ranges').onclick = (ev) => {
     const chip = ev.target.closest('[data-range]');
-    if (!chip || chip.dataset.range === state.range) return;
-    state.range = chip.dataset.range;
-    storage.set(RANGE_KEY, state.range);
-    app.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', c === chip));
-    state.limits = {};
-    load();
+    if (!chip) return;
+    if (chip.dataset.range === 'custom') return openCustomRange();
+    if (chip.dataset.range !== currentRange().id) setRange(chip.dataset.range);
   };
   $('#refresh').onclick = () => {
     client.clear();
@@ -230,11 +254,70 @@ function renderDashboard() {
   loadSites();
 }
 
+function chipsHtml() {
+  const id = currentRange().id;
+  const custom = id === 'custom' ? esc(rangeLabel(currentRange())) : t('range.custom');
+  return (
+    RANGES.map(
+      (r) => `<button class="chip" data-range="${r.id}" aria-pressed="${r.id === id}">${t(`range.${r.id}`)}</button>`,
+    ).join('') +
+    `<button class="chip" data-range="custom" aria-haspopup="dialog" aria-pressed="${id === 'custom'}">${custom}</button>`
+  );
+}
+
+function setRange(id) {
+  state.range = id;
+  storage.set(RANGE_KEY, id);
+  $('.ranges').innerHTML = chipsHtml();
+  $('.ranges [aria-pressed="true"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  state.limits = {};
+  load();
+}
+
+/** Sheet with two date fields for a freely picked range. */
+function openCustomRange() {
+  const today = formatDay(new Date());
+  const p = rangePeriod(currentRange());
+  const from = formatDay(new Date(p.startMs));
+  const to = formatDay(new Date(p.endMs));
+  openSheet(
+    t('range.nav'),
+    t('range.custom.title'),
+    `<form id="custom-range" novalidate>
+      <div class="date-fields">
+        <label class="field"><span>${t('range.custom.from')}</span>
+          <input type="date" name="from" value="${from}" max="${today}" required></label>
+        <label class="field"><span>${t('range.custom.to')}</span>
+          <input type="date" name="to" value="${to}" max="${today}" required></label>
+      </div>
+      <p class="err" hidden></p>
+      <button class="btn" type="submit">${t('range.custom.apply')}</button>
+    </form>`,
+  );
+  const form = $('#custom-range');
+  form.onsubmit = (ev) => {
+    ev.preventDefault();
+    let a = parseDay(form.from.value);
+    let b = parseDay(form.to.value);
+    if (!a || !b) {
+      const err = $('.err', form);
+      err.textContent = t('range.custom.invalid');
+      err.hidden = false;
+      return;
+    }
+    if (a > b) [a, b] = [b, a];
+    state.custom = { from: formatDay(a), to: formatDay(b) };
+    storage.set(CUSTOM_KEY, state.custom);
+    closeSheet();
+    setRange('custom');
+  };
+}
+
 /** (Re)load the hero chart and all cards for the selected range. */
 async function load() {
   const gen = ++state.gen;
   const range = currentRange();
-  const p = period(range.days);
+  const p = rangePeriod(range);
   $('#hero').innerHTML =
     `<div class="hero-label">${t('dash.visitors')}</div><div class="skel big"></div><div class="skel chart-skel"></div>`;
   for (const s of SECTIONS) $(`#sec-${s.id} .body`).innerHTML = SKELETON;
@@ -297,10 +380,10 @@ async function loadHero(gen, range, p) {
     const [cls, sign] = pct > 0 ? ['up', '▲'] : pct < 0 ? ['down', '▼'] : ['flat', '='];
     delta = `<span class="delta ${cls}">${sign} ${num(Math.abs(pct))} %</span>`;
   }
-  const baseLabel = t('dash.visitorsIn', { range: t(`range.${range.id}`) });
+  const baseLabel = t('dash.visitorsIn', { range: rangeLabel(range) });
   const baseSub =
     prev?.total > 0
-      ? esc(t('dash.previous', { count: num(prev.total), prev: t(`range.${range.id}.prev`) }))
+      ? esc(t('dash.previous', { count: num(prev.total), prev: prevRangeLabel(range) }))
       : cur.total_events
         ? esc(t('dash.events', { count: num(cur.total_events) }))
         : '&nbsp;';
@@ -437,7 +520,7 @@ function onGridClick(ev) {
     state.limits[sec.id] = Math.min(MAX_LIMIT, (state.limits[sec.id] || sec.limit) * 3);
     more.textContent = t('dash.loading');
     more.disabled = true;
-    loadSection(state.gen, sec, period(currentRange().days));
+    loadSection(state.gen, sec, rangePeriod(currentRange()));
     return;
   }
   const row = ev.target.closest('button.row');
@@ -490,10 +573,10 @@ function switchSite(base) {
 /** Sheet listing every site with its visitor count for the selected range. */
 function openSites() {
   const range = currentRange();
-  const p = period(range.days);
+  const p = rangePeriod(range);
   const cur = currentBase();
   const token = openSheet(
-    t('sites.kicker', { range: t(`range.${range.id}`) }),
+    t('sites.kicker', { range: rangeLabel(range) }),
     t('sites.title'),
     `<ul class="list">${state.sites
       .map(

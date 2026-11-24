@@ -21,6 +21,14 @@ export const STRINGS = {
     'range.365': '12 months',
     'range.365.prev': 'previous year',
     'range.nav': 'Time range',
+    'range.custom': 'Custom …',
+    'range.custom.prev': 'previous {count} days',
+    'range.custom.prevDay': 'day before',
+    'range.custom.title': 'Custom range',
+    'range.custom.from': 'From',
+    'range.custom.to': 'To',
+    'range.custom.apply': 'Show',
+    'range.custom.invalid': 'Please pick a start and an end date.',
 
     'section.pages': 'Pages',
     'section.toprefs': 'Referrers',
@@ -119,6 +127,14 @@ export const STRINGS = {
     'range.365': '12 Monate',
     'range.365.prev': 'Vorjahr',
     'range.nav': 'Zeitraum',
+    'range.custom.prev': '{count} Tage davor',
+    'range.custom': 'Eigener …',
+    'range.custom.prevDay': 'Vortag',
+    'range.custom.title': 'Eigener Zeitraum',
+    'range.custom.from': 'Von',
+    'range.custom.to': 'Bis',
+    'range.custom.apply': 'Anzeigen',
+    'range.custom.invalid': 'Bitte wähle ein Start- und ein Enddatum.',
 
     'section.pages': 'Seiten',
     'section.toprefs': 'Herkunft',
@@ -243,6 +259,7 @@ function makeFormats() {
     number: new Intl.NumberFormat(l),
     day: new Intl.DateTimeFormat(l, { weekday: 'short', day: 'numeric', month: 'short' }),
     date: new Intl.DateTimeFormat(l, { day: 'numeric', month: 'short' }),
+    dateYear: new Intl.DateTimeFormat(l, { day: 'numeric', month: 'short', year: 'numeric' }),
     time: new Intl.DateTimeFormat(l, { hour: '2-digit', minute: '2-digit' }),
   };
 }

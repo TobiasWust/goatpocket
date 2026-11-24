@@ -5,6 +5,10 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+- Custom time range: the new last chip opens two date fields (from/to). The range is remembered and compared
+  with the same number of days right before it.
+
 ### Changed
 - The app moved to its own domain, <https://app.goatpocket.com>; goatpocket.com is the website. Old app addresses
   (goatpocket.com/app/ and goatpocket.wust.io) redirect there. The app has its own service worker (`app/sw.js`).
